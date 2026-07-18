@@ -10,18 +10,17 @@ cd "$ROOT_DIR"
 log() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
-docker_cmd() {
+compose() {
+  if ! command -v docker-compose >/dev/null 2>&1; then
+    die "docker-compose not found. Run ./start.sh first."
+  fi
   if docker info >/dev/null 2>&1; then
-    docker "$@"
+    docker-compose "$@"
   elif command -v sudo >/dev/null 2>&1 && sudo docker info >/dev/null 2>&1; then
-    sudo docker "$@"
+    sudo docker-compose "$@"
   else
     die "Cannot talk to the Docker daemon."
   fi
-}
-
-compose() {
-  docker_cmd compose "$@"
 }
 
 [[ -f .env ]] || die "Missing .env — run ./start.sh first."
@@ -82,13 +81,13 @@ HTTPS enabled for https://${DOMAIN}
 Certbot renewer runs under the Compose profile "https".
 To start the full stack later:
 
-  docker compose --profile https up -d
+  docker-compose --profile https up -d
 
 To revert to HTTP-only:
 
   cp ${HTTP_BAK} ${HTTP_CONF}
-  docker compose --profile https down
-  docker compose up -d
-  docker compose exec nginx nginx -s reload
+  docker-compose --profile https down
+  docker-compose up -d
+  docker-compose exec nginx nginx -s reload
 
 EOF

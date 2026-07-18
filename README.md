@@ -11,7 +11,7 @@ chmod +x start.sh scripts/enable-https.sh
 
 `start.sh` will:
 
-1. Install Docker Engine + Compose (if missing) on Ubuntu
+1. Install Docker Engine and `docker-compose` (if missing) on Ubuntu
 2. Create `.env` with strong random passwords
 3. Render `odoo/config/odoo.conf`
 4. Pull images and start `db`, `odoo`, and `nginx`
@@ -79,31 +79,31 @@ This issues a certificate, switches nginx to HTTPS (HTTP → HTTPS redirect), an
 Later starts with HTTPS:
 
 ```bash
-docker compose --profile https up -d
+docker-compose --profile https up -d
 ```
 
 Revert to HTTP-only:
 
 ```bash
 cp nginx/conf.d/odoo.conf.http.bak nginx/conf.d/odoo.conf
-docker compose --profile https down
-docker compose up -d
-docker compose exec nginx nginx -s reload
+docker-compose --profile https down
+docker-compose up -d
+docker-compose exec nginx nginx -s reload
 ```
 
 ## Day-to-day commands
 
 ```bash
-docker compose ps
-docker compose logs -f odoo
-docker compose down          # stop containers (keeps volumes)
-docker compose up -d         # start again
+docker-compose ps
+docker-compose logs -f odoo
+docker-compose down          # stop containers (keeps volumes)
+docker-compose up -d         # start again
 ```
 
 Custom addons: place them under `addons/` and restart Odoo:
 
 ```bash
-docker compose restart odoo
+docker-compose restart odoo
 ```
 
 ## Troubleshooting
@@ -115,10 +115,10 @@ Change `HTTP_PORT` in `.env` (e.g. `8080`) and re-run `./start.sh`, or free the 
 `start.sh` may add your user to the `docker` group. Log out and back in, or use `sudo ./start.sh`.
 
 **Cannot create database / wrong master password**  
-Use `ODOO_ADMIN_PASSWORD` from `.env`. After changing it, re-run `./start.sh` so `odoo.conf` is re-rendered, then `docker compose restart odoo`.
+Use `ODOO_ADMIN_PASSWORD` from `.env`. After changing it, re-run `./start.sh` so `odoo.conf` is re-rendered, then `docker-compose restart odoo`.
 
 **Odoo not reachable behind nginx**  
-Check `docker compose ps` and `docker compose logs nginx odoo`. Confirm the host firewall allows `HTTP_PORT`.
+Check `docker-compose ps` and `docker-compose logs nginx odoo`. Confirm the host firewall allows `HTTP_PORT`.
 
 **HTTPS certificate fails**  
 DNS must resolve `DOMAIN` to this host; port 80 must be public; `EMAIL` and `DOMAIN` must be set in `.env`.

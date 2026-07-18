@@ -22,18 +22,21 @@ run_as_root() {
   fi
 }
 
-docker_cmd() {
-  if docker info >/dev/null 2>&1; then
-    docker "$@"
-  elif command -v sudo >/dev/null 2>&1 && sudo docker info >/dev/null 2>&1; then
-    sudo docker "$@"
-  else
-    die "Cannot talk to the Docker daemon. Start Docker or add your user to the docker group, then re-login."
-  fi
+docker_ok() {
+  docker info >/dev/null 2>&1 || { command -v sudo >/dev/null 2>&1 && sudo docker info >/dev/null 2>&1; }
 }
 
 compose() {
-  docker_cmd compose "$@"
+  if ! command -v docker-compose >/dev/null 2>&1; then
+    die "docker-compose not found. Re-run ./start.sh on Ubuntu to install it, or install docker-compose manually."
+  fi
+  if docker info >/dev/null 2>&1; then
+    docker-compose "$@"
+  elif command -v sudo >/dev/null 2>&1 && sudo docker info >/dev/null 2>&1; then
+    sudo docker-compose "$@"
+  else
+    die "Cannot talk to the Docker daemon. Start Docker or add your user to the docker group, then re-login."
+  fi
 }
 
 detect_primary_ip() {
@@ -55,7 +58,7 @@ install_docker_ubuntu() {
   need_cmd apt-get
   need_cmd curl
 
-  log "Installing Docker Engine and Compose plugin (Ubuntu)..."
+  log "Installing Docker Engine (Ubuntu)..."
   run_as_root apt-get update
   run_as_root apt-get install -y ca-certificates curl
   run_as_root install -m 0755 -d /etc/apt/keyrings
@@ -72,7 +75,7 @@ install_docker_ubuntu() {
     | run_as_root tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   run_as_root apt-get update
-  run_as_root apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  run_as_root apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
   run_as_root systemctl enable --now docker
 
   if [[ "$(id -u)" -ne 0 ]] && command -v usermod >/dev/null 2>&1; then
@@ -81,23 +84,54 @@ install_docker_ubuntu() {
   fi
 }
 
+install_docker_compose() {
+  if command -v docker-compose >/dev/null 2>&1; then
+    return
+  fi
+
+  need_cmd curl
+  log "Installing docker-compose standalone binary..."
+
+  local arch uname_m binary
+  uname_m="$(uname -m)"
+  case "$uname_m" in
+    x86_64|amd64) arch="x86_64" ;;
+    aarch64|arm64) arch="aarch64" ;;
+    *) die "Unsupported architecture for docker-compose: $uname_m" ;;
+  esac
+
+  binary="https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-${arch}"
+  run_as_root curl -fsSL "$binary" -o /usr/local/bin/docker-compose
+  run_as_root chmod +x /usr/local/bin/docker-compose
+}
+
 ensure_docker() {
-  if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
-    if docker info >/dev/null 2>&1 || { command -v sudo >/dev/null 2>&1 && sudo docker info >/dev/null 2>&1; }; then
-      return
-    fi
+  local need_install=0
+
+  if ! command -v docker >/dev/null 2>&1 || ! docker_ok; then
+    need_install=1
+  fi
+  if ! command -v docker-compose >/dev/null 2>&1; then
+    need_install=1
+  fi
+
+  if [[ "$need_install" -eq 0 ]]; then
+    return
   fi
 
   if [[ -r /etc/os-release ]]; then
     # shellcheck disable=SC1091
     . /etc/os-release
     if [[ "${ID:-}" == "ubuntu" ]]; then
-      install_docker_ubuntu
+      if ! command -v docker >/dev/null 2>&1 || ! docker_ok; then
+        install_docker_ubuntu
+      fi
+      install_docker_compose
       return
     fi
   fi
 
-  die "Docker is not installed. On Ubuntu 24.04 this script can install it automatically; otherwise install Docker Engine + Compose plugin first."
+  die "Docker / docker-compose is not installed. On Ubuntu 24.04 this script can install them automatically; otherwise install Docker Engine and docker-compose first."
 }
 
 random_secret() {
@@ -226,9 +260,9 @@ Optional HTTPS later:
   3. Run: ./scripts/enable-https.sh
 
 Useful commands:
-  docker compose logs -f
-  docker compose ps
-  docker compose down
+  docker-compose logs -f
+  docker-compose ps
+  docker-compose down
 
 EOF
 }
