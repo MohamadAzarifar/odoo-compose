@@ -54,84 +54,76 @@ detect_primary_ip() {
   printf 'localhost\n'
 }
 
-install_docker_ubuntu() {
-  need_cmd apt-get
-  need_cmd curl
+# From https://github.com/cybrtps/Docker-offline-install
+DOCKER_OFFLINE_REPO="https://github.com/cybrtps/Docker-offline-install.git"
+DOCKER_OFFLINE_BUNDLE="docker-offline-bundle-bookworm.tar.gz"
+DOCKER_OFFLINE_SHA256="bf3e6504e9f3d4f8a852f0a009d8e37676ae8475b9d6c770105681f64254584e"
 
-  log "Installing Docker Engine (Ubuntu)..."
-  run_as_root apt-get update
-  run_as_root apt-get install -y ca-certificates curl
-  run_as_root install -m 0755 -d /etc/apt/keyrings
-  run_as_root curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-  run_as_root chmod a+r /etc/apt/keyrings/docker.asc
+install_docker_offline() {
+  need_cmd git
+  need_cmd sha256sum
 
-  # shellcheck disable=SC1091
-  . /etc/os-release
-  local arch codename
-  arch="$(dpkg --print-architecture)"
-  codename="${VERSION_CODENAME:-noble}"
+  local workdir
+  workdir="$(mktemp -d /tmp/docker-offline-install.XXXXXX)"
+  # shellcheck disable=SC2064
+  trap "rm -rf '$workdir'" RETURN
 
-  echo "deb [arch=${arch} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${codename} stable" \
-    | run_as_root tee /etc/apt/sources.list.d/docker.list >/dev/null
+  log "Installing Docker + docker-compose via cybrtps/Docker-offline-install..."
+  log "Cloning ${DOCKER_OFFLINE_REPO}"
+  git clone --depth 1 "$DOCKER_OFFLINE_REPO" "$workdir/docker-offline-install"
+  cd "$workdir/docker-offline-install"
 
-  run_as_root apt-get update
-  run_as_root apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
-  run_as_root systemctl enable --now docker
+  [[ -f "$DOCKER_OFFLINE_BUNDLE" ]] || die "Missing $DOCKER_OFFLINE_BUNDLE in offline install repo."
+
+  log "Verifying bundle integrity (sha256)..."
+  local actual
+  actual="$(sha256sum "$DOCKER_OFFLINE_BUNDLE" | awk '{print $1}')"
+  if [[ "$actual" != "$DOCKER_OFFLINE_SHA256" ]]; then
+    die "Bundle hash mismatch.
+Expected: ${DOCKER_OFFLINE_SHA256}
+Actual:   ${actual}
+Refusing to install."
+  fi
+  log "Bundle hash OK."
+
+  chmod +x run-docker-install.sh
+  # install.sh inside the bundle typically needs root for dpkg/systemctl
+  run_as_root ./run-docker-install.sh
+
+  cd "$ROOT_DIR"
 
   if [[ "$(id -u)" -ne 0 ]] && command -v usermod >/dev/null 2>&1; then
     run_as_root usermod -aG docker "$USER" || true
     warn "Added '$USER' to the docker group. If docker commands fail without sudo, log out and back in."
   fi
-}
 
-install_docker_compose() {
-  if command -v docker-compose >/dev/null 2>&1; then
-    return
-  fi
-
-  need_cmd curl
-  log "Installing docker-compose standalone binary..."
-
-  local arch uname_m binary
-  uname_m="$(uname -m)"
-  case "$uname_m" in
-    x86_64|amd64) arch="x86_64" ;;
-    aarch64|arm64) arch="aarch64" ;;
-    *) die "Unsupported architecture for docker-compose: $uname_m" ;;
-  esac
-
-  binary="https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-${arch}"
-  run_as_root curl -fsSL "$binary" -o /usr/local/bin/docker-compose
-  run_as_root chmod +x /usr/local/bin/docker-compose
+  command -v docker >/dev/null 2>&1 || die "Docker install finished but 'docker' was not found on PATH."
+  command -v docker-compose >/dev/null 2>&1 || die "Docker install finished but 'docker-compose' was not found on PATH."
+  log "Docker offline install complete: $(docker --version 2>/dev/null || true)"
+  log "Compose: $(docker-compose version 2>/dev/null || true)"
 }
 
 ensure_docker() {
-  local need_install=0
-
-  if ! command -v docker >/dev/null 2>&1 || ! docker_ok; then
-    need_install=1
-  fi
-  if ! command -v docker-compose >/dev/null 2>&1; then
-    need_install=1
-  fi
-
-  if [[ "$need_install" -eq 0 ]]; then
+  if command -v docker >/dev/null 2>&1 && command -v docker-compose >/dev/null 2>&1 && docker_ok; then
     return
   fi
 
   if [[ -r /etc/os-release ]]; then
     # shellcheck disable=SC1091
     . /etc/os-release
-    if [[ "${ID:-}" == "ubuntu" ]]; then
-      if ! command -v docker >/dev/null 2>&1 || ! docker_ok; then
-        install_docker_ubuntu
-      fi
-      install_docker_compose
-      return
-    fi
+    # Bundle targets Debian 12-based systems (Ubuntu 22.04+)
+    case "${ID:-}" in
+      ubuntu|debian|kali|parrot)
+        install_docker_offline
+        return
+        ;;
+    esac
   fi
 
-  die "Docker / docker-compose is not installed. On Ubuntu 24.04 this script can install them automatically; otherwise install Docker Engine and docker-compose first."
+  die "Docker / docker-compose is not installed.
+On Ubuntu/Debian this script installs them via:
+  ${DOCKER_OFFLINE_REPO}
+Otherwise install Docker Engine and docker-compose manually, then re-run ./start.sh."
 }
 
 random_secret() {

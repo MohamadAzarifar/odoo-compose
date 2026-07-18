@@ -11,7 +11,7 @@ chmod +x start.sh scripts/enable-https.sh
 
 `start.sh` will:
 
-1. Install Docker Engine and `docker-compose` (if missing) on Ubuntu
+1. Install Docker Engine and `docker-compose` if missing, using the [cybrtps/Docker-offline-install](https://github.com/cybrtps/Docker-offline-install) bundle (with sha256 verification)
 2. Create `.env` with strong random passwords
 3. Render `odoo/config/odoo.conf`
 4. Pull images and start `db`, `odoo`, and `nginx`
@@ -125,6 +125,16 @@ DNS must resolve `DOMAIN` to this host; port 80 must be public; `EMAIL` and `DOM
 
 ## Requirements
 
-- Ubuntu 24.04 recommended for automatic Docker install
+- Ubuntu 24.04 (or other Debian 12-based distro) for automatic Docker install
+- `git` and `sha256sum` available when Docker is not yet installed
 - ~2 GB RAM minimum; 4–8 GB recommended for comfortable use
-- Outbound network access to pull images (and Let's Encrypt if using HTTPS)
+- Outbound network access to clone [Docker-offline-install](https://github.com/cybrtps/Docker-offline-install), pull Odoo/Postgres/nginx images, and (optionally) reach Let's Encrypt
+
+### Docker install method
+
+If Docker is missing, `start.sh` follows the [cybrtps/Docker-offline-install](https://github.com/cybrtps/Docker-offline-install) instructions:
+
+1. Clone the repo
+2. Verify `docker-offline-bundle-bookworm.tar.gz` sha256  
+   (`bf3e6504e9f3d4f8a852f0a009d8e37676ae8475b9d6c770105681f64254584e`)
+3. Run `./run-docker-install.sh`
