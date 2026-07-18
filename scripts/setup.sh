@@ -20,7 +20,7 @@ source .env
 set +a
 
 # Replace domain in nginx config
-sed -i "s/\${DOMAIN}/$DOMAIN/g" nginx/conf.d/odoo.conf
+sed -i "s/\${DOMAIN}/79.132.192.98/g" nginx/conf.d/odoo.conf
 
 # Start services
 echo "📦 Starting Docker containers..."
@@ -34,7 +34,7 @@ sleep 10
 # Check if Odoo is responding
 if curl -s -o /dev/null -w "%{http_code}" http://localhost:8069 | grep -q "200\|301\|302"; then
     echo "✅ Odoo is running!"
-    echo "🌐 Access at: http://$DOMAIN (or http://your-vps-ip)"
+    echo "🌐 Access at: http://79.132.192.98 (or http://your-vps-ip)"
 else
     echo "⚠️  Odoo might not be ready yet. Check logs with: docker-compose logs odoo"
 fi
