@@ -35,8 +35,9 @@ services:
       retries: 5
       start_period: 20s
     restart: unless-stopped
+    # No internet: only on the internal network
     networks:
-      - odoo_network
+      - internal
     deploy:
       resources:
         limits:
@@ -61,8 +62,9 @@ services:
       - ./odoo/config:/etc/odoo
       - ./addons:/mnt/extra-addons
     restart: unless-stopped
+    # No internet: only on the internal network
     networks:
-      - odoo_network
+      - internal
     deploy:
       resources:
         limits:
@@ -85,8 +87,10 @@ services:
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/letsencrypt:ro
     restart: unless-stopped
+    # frontend: publish ports; internal: proxy to odoo
     networks:
-      - odoo_network
+      - frontend
+      - internal
     deploy:
       resources:
         limits:
@@ -105,8 +109,9 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
     restart: unless-stopped
+    # Needs outbound access for Let's Encrypt renewals
     networks:
-      - odoo_network
+      - frontend
     deploy:
       resources:
         limits:
@@ -114,7 +119,12 @@ services:
           memory: 64M
 
 networks:
-  odoo_network:
+  # No default gateway — db and odoo cannot reach the internet
+  internal:
+    driver: bridge
+    internal: true
+  # nginx / certbot only
+  frontend:
     driver: bridge
 
 volumes:

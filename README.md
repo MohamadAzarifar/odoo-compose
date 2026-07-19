@@ -27,6 +27,8 @@ Then open the printed URL (port **80** by default), create a database, and use t
 | `nginx` | `nginx:1.27-alpine` | Reverse proxy on HTTP `80` (and `443` when HTTPS is enabled) |
 | `certbot` | `certbot/certbot` | Certificate renewal (Compose profile `https`, optional) |
 
+**Network isolation:** `db` and `odoo` are attached only to an `internal: true` Docker network (no internet). `nginx` sits on both `frontend` (published ports) and `internal` (proxy to Odoo). `certbot` uses `frontend` so renewals can reach Let's Encrypt.
+
 Data persists in Docker volumes `odoo_db_data` and `odoo_data`.
 
 ## Project layout
