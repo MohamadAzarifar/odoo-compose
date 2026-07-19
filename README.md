@@ -22,12 +22,13 @@ Then open the printed URL (port **80** by default), create a database, and use t
 
 | Service | Image | Role |
 |---------|--------|------|
-| `db` | `postgres:16` | Database (internal only) |
-| `odoo` | `odoo:19` | Application (internal only) |
+| `db` | `postgres:16` | Database (internal only, no internet) |
+| `odoo` | `odoo:19` | Application (internal only; egress via Squid allowlist) |
+| `proxy` | `ubuntu/squid` | Allowlisted HTTP/HTTPS(/SMTP CONNECT) egress for Odoo |
 | `nginx` | `nginx:1.27-alpine` | Reverse proxy on HTTP `80` (and `443` when HTTPS is enabled) |
 | `certbot` | `certbot/certbot` | Certificate renewal (Compose profile `https`, optional) |
 
-**Network isolation:** `db` and `odoo` are attached only to an `internal: true` Docker network (no internet). `nginx` sits on both `frontend` (published ports) and `internal` (proxy to Odoo). `certbot` uses `frontend` so renewals can reach Let's Encrypt.
+**Network isolation:** `db` and `odoo` use an `internal: true` network (no direct internet). Odoo’s outbound traffic goes only through `proxy` (Squid) to domains listed in [`proxy/allowlist.txt`](proxy/allowlist.txt). `nginx` is on `frontend` + `internal`. `certbot` and Squid’s upstream use `frontend`.
 
 Data persists in Docker volumes `odoo_db_data` and `odoo_data`.
 
@@ -41,6 +42,9 @@ Data persists in Docker volumes `odoo_db_data` and `odoo_data`.
 ├── addons/                  # Custom Odoo addons (bind-mounted)
 ├── odoo/config/
 │   └── odoo.conf.template   # Rendered to odoo.conf on start
+├── proxy/
+│   ├── squid.conf           # Squid config (deny-by-default)
+│   └── allowlist.txt        # Domains Odoo may reach
 ├── nginx/conf.d/
 │   ├── odoo.conf            # Default HTTP reverse proxy
 │   └── odoo-https.conf.template
@@ -122,6 +126,9 @@ Use `ODOO_ADMIN_PASSWORD` from `.env`. After changing it, re-run `./start.sh` so
 **Odoo not reachable behind nginx**  
 Check `docker-compose ps` and `docker-compose logs nginx odoo`. Confirm the host firewall allows `HTTP_PORT`.
 
+**Outbound from Odoo blocked / Apps store fails**  
+Add the required domain to `proxy/allowlist.txt` (e.g. `.odoo.com`), then `docker-compose restart proxy`. Check `docker-compose logs proxy`.
+
 **HTTPS certificate fails**  
 DNS must resolve `DOMAIN` to this host; port 80 must be public; `EMAIL` and `DOMAIN` must be set in `.env`.
 
@@ -138,9 +145,25 @@ DNS must resolve `DOMAIN` to this host; port 80 must be public; `EMAIL` and `DOM
 |---------|-----------|--------------|
 | `db` | 1.5 | 1.5 GB |
 | `odoo` | 4.0 | 5 GB |
+| `proxy` | 0.25 | 128 MB |
 | `nginx` | 0.25 | 128 MB |
 
 Odoo uses `workers = 2` and per-worker soft/hard memory caps (~1 / 1.25 GB) so a handful of users stay comfortable without starving Postgres.
+
+### Allowlisted egress (Squid)
+
+Odoo has **no direct internet**. Outbound HTTP/HTTPS (and SMTP `CONNECT` on 465/587) goes through Squid and is **denied unless listed** in [`proxy/allowlist.txt`](proxy/allowlist.txt).
+
+```bash
+# Edit allowlist (one domain per line; .example.com allows subdomains)
+nano proxy/allowlist.txt
+
+# Reload Squid
+docker-compose restart proxy
+```
+
+Examples to uncomment when needed: `.odoo.com`, `smtp.gmail.com`, `api.stripe.com`.  
+`db` never gets egress. Clients still reach Odoo only via nginx.
 
 ### Docker install method
 

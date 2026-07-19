@@ -1,5 +1,5 @@
-# Resource plan for 6-core / 8GB host, ~5 concurrent users:
-#   OS/Docker headroom ~1GB | db ~1.5GB | odoo ~5GB | nginx ~128MB
+# Squid allowlist proxy: Odoo reaches only domains listed in proxy/allowlist.txt
+# Resource plan for 6-core / 8GB: OS ~1GB | db 1.5GB | odoo 5GB | nginx 128MB | squid 128MB
 services:
   db:
     image: postgres:16
@@ -9,7 +9,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-odoo}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       PGDATA: /var/lib/postgresql/data/pgdata
-    # Light Postgres tuning for 8GB host / few users
     command:
       - postgres
       - -c
@@ -35,7 +34,7 @@ services:
       retries: 5
       start_period: 20s
     restart: unless-stopped
-    # No internet: only on the internal network
+    # No internet — internal network only
     networks:
       - internal
     deploy:
@@ -47,22 +46,51 @@ services:
           cpus: "0.50"
           memory: 512M
 
+  proxy:
+    image: ubuntu/squid:latest
+    container_name: odoo_proxy
+    volumes:
+      - ./proxy/squid.conf:/etc/squid/squid.conf:ro
+      - ./proxy/allowlist.txt:/etc/squid/allowlist.txt:ro
+    restart: unless-stopped
+    # Speaks to Odoo on internal; reaches allowlisted hosts via frontend
+    networks:
+      - internal
+      - frontend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+
   odoo:
     image: odoo:19
     container_name: odoo_app
     depends_on:
       db:
         condition: service_healthy
+      proxy:
+        condition: service_started
     environment:
       HOST: db
       USER: ${POSTGRES_USER:-odoo}
       PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      # Outbound only via Squid allowlist (no direct internet)
+      HTTP_PROXY: http://proxy:3128
+      HTTPS_PROXY: http://proxy:3128
+      http_proxy: http://proxy:3128
+      https_proxy: http://proxy:3128
+      NO_PROXY: db,proxy,nginx,localhost,127.0.0.1
+      no_proxy: db,proxy,nginx,localhost,127.0.0.1
     volumes:
       - odoo_data:/var/lib/odoo
       - ./odoo/config:/etc/odoo
       - ./addons:/mnt/extra-addons
     restart: unless-stopped
-    # No internet: only on the internal network
+    # No direct internet — internal only; egress via proxy service
     networks:
       - internal
     deploy:
@@ -87,7 +115,6 @@ services:
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/letsencrypt:ro
     restart: unless-stopped
-    # frontend: publish ports; internal: proxy to odoo
     networks:
       - frontend
       - internal
@@ -109,7 +136,6 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
     restart: unless-stopped
-    # Needs outbound access for Let's Encrypt renewals
     networks:
       - frontend
     deploy:
@@ -119,11 +145,11 @@ services:
           memory: 64M
 
 networks:
-  # No default gateway — db and odoo cannot reach the internet
+  # No default gateway — db/odoo cannot reach the internet directly
   internal:
     driver: bridge
     internal: true
-  # nginx / certbot only
+  # nginx, certbot, and squid egress
   frontend:
     driver: bridge
 

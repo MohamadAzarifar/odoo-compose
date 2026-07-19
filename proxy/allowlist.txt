@@ -1,0 +1,11 @@
+# Domains Odoo may reach through Squid (one per line).
+# Use a leading dot to allow the domain and all subdomains (.example.com).
+# Default deny-all: only non-routable placeholder below (remove when adding real domains).
+.invalid
+
+# Examples — replace .invalid with real entries, then: docker-compose restart proxy
+# .odoo.com
+# smtp.gmail.com
+# smtp.sendgrid.net
+# api.stripe.com
+# .paypal.com
