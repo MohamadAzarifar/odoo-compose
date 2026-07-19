@@ -1,3 +1,5 @@
+# Resource plan for 6-core / 8GB host, ~5 concurrent users:
+#   OS/Docker headroom ~1GB | db ~1.5GB | odoo ~5GB | nginx ~128MB
 services:
   db:
     image: postgres:16
@@ -7,6 +9,23 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-odoo}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       PGDATA: /var/lib/postgresql/data/pgdata
+    # Light Postgres tuning for 8GB host / few users
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - effective_cache_size=1536MB
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=128MB
+      - -c
+      - max_connections=50
+      - -c
+      - checkpoint_completion_target=0.9
+      - -c
+      - random_page_cost=1.1
     volumes:
       - odoo_db_data:/var/lib/postgresql/data/pgdata
     healthcheck:
@@ -18,6 +37,14 @@ services:
     restart: unless-stopped
     networks:
       - odoo_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.50"
+          memory: 1536M
+        reservations:
+          cpus: "0.50"
+          memory: 512M
 
   odoo:
     image: odoo:19
@@ -36,6 +63,14 @@ services:
     restart: unless-stopped
     networks:
       - odoo_network
+    deploy:
+      resources:
+        limits:
+          cpus: "4.00"
+          memory: 5G
+        reservations:
+          cpus: "1.00"
+          memory: 1G
 
   nginx:
     image: nginx:1.27-alpine
@@ -52,6 +87,14 @@ services:
     restart: unless-stopped
     networks:
       - odoo_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
 
   certbot:
     profiles: ["https"]
@@ -64,6 +107,11 @@ services:
     restart: unless-stopped
     networks:
       - odoo_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.10"
+          memory: 64M
 
 networks:
   odoo_network:

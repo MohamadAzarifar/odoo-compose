@@ -127,8 +127,18 @@ DNS must resolve `DOMAIN` to this host; port 80 must be public; `EMAIL` and `DOM
 
 - Ubuntu 24.04 (or other Debian 12-based distro) for automatic Docker install
 - `git` and `sha256sum` available when Docker is not yet installed
-- ~2 GB RAM minimum; 4–8 GB recommended for comfortable use
+- Sized for a **6-core / 8GB** host with about **5 users** (Odoo workers=2; container limits leave ~1GB for the OS)
 - Outbound network access to clone [Docker-offline-install](https://github.com/cybrtps/Docker-offline-install), pull Odoo/Postgres/nginx images, and (optionally) reach Let's Encrypt
+
+### Resource limits (6-core / 8GB)
+
+| Service | CPU limit | Memory limit |
+|---------|-----------|--------------|
+| `db` | 1.5 | 1.5 GB |
+| `odoo` | 4.0 | 5 GB |
+| `nginx` | 0.25 | 128 MB |
+
+Odoo uses `workers = 2` and per-worker soft/hard memory caps (~1 / 1.25 GB) so a handful of users stay comfortable without starving Postgres.
 
 ### Docker install method
 

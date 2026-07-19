@@ -8,20 +8,21 @@ db_user = __POSTGRES_USER__
 db_password = __POSTGRES_PASSWORD__
 admin_passwd = __ODOO_ADMIN_PASSWORD__
 
-# Tuned for a typical 4–8 GB host; adjust if you have more CPU/RAM
-workers = 4
-limit_memory_hard = 2684354560
-limit_memory_soft = 2147483648
+# 6-core / 8GB host, ~5 users: keep workers low so Postgres + OS stay responsive.
+# Rule of thumb for light load: 1–2 workers is enough under 10 users.
+workers = 2
+max_cron_threads = 1
+limit_memory_soft = 1073741824
+limit_memory_hard = 1342177280
 limit_request = 8192
 limit_time_cpu = 600
 limit_time_real = 1200
-max_cron_threads = 1
 
 proxy_mode = True
 list_db = True
 
 log_level = info
-db_maxconn = 64
+db_maxconn = 16
 http_enable = True
 http_interface = 0.0.0.0
 http_port = 8069
