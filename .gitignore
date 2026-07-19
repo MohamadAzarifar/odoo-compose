@@ -5,3 +5,6 @@ certbot/www/
 *.log
 .DS_Store
 .cursor
+__pycache__/
+*.py[cod]
+*$py.class
