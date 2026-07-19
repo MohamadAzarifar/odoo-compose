@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_tree" model="ir.ui.view">
+        <field name="name">sa.property.tree</field>
+        <field name="model">sa.property</field>
+        <field name="arch" type="xml">
+            <list string="Properties" decoration-success="state == 'available'"
+                  decoration-warning="state == 'reserved'"
+                  decoration-info="state in ('booked', 'sold')"
+                  decoration-muted="state in ('transferred', 'blocked')">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="property_type"/>
+                <field name="block" optional="show"/>
+                <field name="plot_number" optional="show"/>
+                <field name="area"/>
+                <field name="area_uom"/>
+                <field name="base_price" sum="Total"/>
+                <field name="current_owner_id" optional="show"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_kanban" model="ir.ui.view">
+        <field name="name">sa.property.kanban</field>
+        <field name="model">sa.property</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="project_id"/>
+                <field name="area"/>
+                <field name="area_uom"/>
+                <field name="base_price"/>
+                <field name="state"/>
+                <field name="image"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div t-if="record.image.raw_value" class="o_kanban_image">
+                                <img t-att-src="'/web/image/sa.property/' + record.id.raw_value + '/image'"
+                                     t-att-alt="record.name.value" style="width:100%;height:140px;object-fit:cover;border-radius:4px;"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong><field name="name"/></strong>
+                                <div class="text-muted"><field name="code"/></div>
+                                <div><field name="project_id"/></div>
+                                <div>
+                                    <field name="area"/> <field name="area_uom"/>
+                                </div>
+                                <div class="o_kanban_record_subtitle">
+                                    <field name="base_price" widget="monetary"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_sa_property_form" model="ir.ui.view">
+        <field name="name">sa.property.form</field>
+        <field name="model">sa.property</field>
+        <field name="arch" type="xml">
+            <form string="Property">
+                <header>
+                    <button name="action_set_available" type="object"
+                            string="Mark Available" class="btn-primary"
+                            invisible="state in ('available', 'booked', 'sold', 'transferred')"/>
+                    <button name="action_block" type="object"
+                            string="Block" invisible="state in ('blocked', 'booked', 'sold', 'transferred')"/>
+                    <button name="action_unblock" type="object"
+                            string="Unblock" class="btn-primary"
+                            invisible="state != 'blocked'"/>
+                    <button name="action_open_buyback_wizard" type="object"
+                            string="Buy Back"
+                            invisible="state not in ('sold', 'transferred')"/>
+                    <button name="action_open_surrender_wizard" type="object"
+                            string="Surrender"
+                            invisible="state != 'booked'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,available,booked,sold,transferred"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
+                            invisible="active"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_bookings" type="object"
+                                class="oe_stat_button" icon="fa-handshake-o">
+                            <field name="booking_count" widget="statinfo" string="Bookings"/>
+                        </button>
+                        <button name="action_view_transfers" type="object"
+                                class="oe_stat_button" icon="fa-exchange">
+                            <field name="transfer_count" widget="statinfo" string="Transfers"/>
+                        </button>
+                        <button name="action_view_documents" type="object"
+                                class="oe_stat_button" icon="fa-folder-open-o">
+                            <field name="document_count" widget="statinfo" string="Documents"/>
+                        </button>
+                        <button name="action_view_product" type="object"
+                                class="oe_stat_button" icon="fa-cube"
+                                invisible="not product_tmpl_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Product</span>
+                            </div>
+                        </button>
+                        <button name="action_view_stock" type="object"
+                                class="oe_stat_button" icon="fa-cubes"
+                                invisible="not product_id">
+                            <field name="qty_on_hand" widget="statinfo" string="On Hand"/>
+                        </button>
+                    </div>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Property title"/></h1>
+                        <field name="code" readonly="1"/>
+                    </div>
+                    <group>
+                        <group string="Location">
+                            <field name="project_id" options="{'no_create_edit': True}"/>
+                            <field name="block"/>
+                            <field name="street"/>
+                            <field name="plot_number"/>
+                            <field name="floor"/>
+                            <field name="facing"/>
+                            <field name="location_premium"/>
+                        </group>
+                        <group string="Specs">
+                            <field name="property_type"/>
+                            <label for="area"/>
+                            <div class="o_row">
+                                <field name="area"/>
+                                <field name="area_uom"/>
+                            </div>
+                            <field name="covered_area"/>
+                            <field name="bedrooms" invisible="property_type == 'plot'"/>
+                            <field name="bathrooms" invisible="property_type == 'plot'"/>
+                            <field name="parking_spaces" invisible="property_type == 'plot'"/>
+                            <field name="feature_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Pricing">
+                            <field name="base_price"/>
+                            <field name="price_per_unit_area"/>
+                            <field name="dc_value"/>
+                            <field name="currency_id" options="{'no_create': True}"
+                                   groups="base.group_multi_currency"/>
+                        </group>
+                        <group string="Ownership">
+                            <field name="current_owner_id"/>
+                            <field name="deal_id" readonly="1"
+                                   options="{'no_create': True}"/>
+                            <field name="product_tmpl_id" readonly="1"/>
+                            <field name="product_id" invisible="1"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                        <page string="Gallery">
+                            <field name="image_ids" mode="kanban">
+                                <kanban>
+                                    <templates>
+                                        <t t-name="card">
+                                            <div class="o_kanban_image_fill_left d-none"/>
+                                            <field name="image" widget="image" class="w-100"/>
+                                            <div class="px-2 py-1">
+                                                <field name="name" placeholder="Title"/>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                                <form>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="sequence"/>
+                                        <field name="image" widget="image"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Marketing Collateral">
+                            <field name="collateral_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="collateral_type"/>
+                                    <field name="file" filename="file_name"/>
+                                    <field name="file_name" column_invisible="1"/>
+                                    <field name="url" widget="url"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Bookings">
+                            <field name="booking_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="customer_id"/>
+                                    <field name="booking_date"/>
+                                    <field name="total_price"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Transfers">
+                            <field name="transfer_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="transfer_date"/>
+                                    <field name="from_partner_id"/>
+                                    <field name="to_partner_id"/>
+                                    <field name="sale_price"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Service Billing">
+                            <field name="service_assignment_ids">
+                                <list editable="bottom">
+                                    <field name="name" readonly="1"/>
+                                    <field name="service_id"/>
+                                    <field name="customer_id"/>
+                                    <field name="recurrence"/>
+                                    <field name="price"/>
+                                    <field name="next_invoice_date"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_property_search" model="ir.ui.view">
+        <field name="name">sa.property.search</field>
+        <field name="model">sa.property</field>
+        <field name="arch" type="xml">
+            <search string="Properties">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="project_id"/>
+                <field name="block"/>
+                <field name="plot_number"/>
+                <field name="current_owner_id"/>
+                <filter string="Available" name="available" domain="[('state', '=', 'available')]"/>
+                <filter string="Reserved" name="reserved" domain="[('state', '=', 'reserved')]"/>
+                <filter string="Booked" name="booked" domain="[('state', '=', 'booked')]"/>
+                <filter string="Sold" name="sold" domain="[('state', '=', 'sold')]"/>
+                <filter string="Transferred" name="transferred" domain="[('state', '=', 'transferred')]"/>
+                <separator/>
+                <filter string="Plot" name="type_plot" domain="[('property_type', '=', 'plot')]"/>
+                <filter string="House" name="type_house" domain="[('property_type', '=', 'house')]"/>
+                <filter string="Apartment" name="type_apt" domain="[('property_type', '=', 'apartment')]"/>
+                <filter string="Commercial" name="type_com" domain="[('property_type', 'in', ('shop', 'commercial', 'office'))]"/>
+                <group>
+                    <filter string="Project" name="grp_project" context="{'group_by': 'project_id'}"/>
+                    <filter string="Type" name="grp_type" context="{'group_by': 'property_type'}"/>
+                    <filter string="State" name="grp_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_property" model="ir.actions.act_window">
+        <field name="name">Properties</field>
+        <field name="res_model">sa.property</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_sa_property_search"/>
+    </record>
+
+    <!-- Property Feature -->
+    <record id="view_sa_property_feature_tree" model="ir.ui.view">
+        <field name="name">sa.property.feature.tree</field>
+        <field name="model">sa.property.feature</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="color" widget="color_picker"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sa_property_feature" model="ir.actions.act_window">
+        <field name="name">Property Features</field>
+        <field name="res_model">sa.property.feature</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

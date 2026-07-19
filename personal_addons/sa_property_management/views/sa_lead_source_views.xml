@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_lead_source_list" model="ir.ui.view">
+        <field name="name">sa.lead.source.list</field>
+        <field name="model">sa.lead.source</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="platform"/>
+                <field name="user_id"/>
+                <field name="lead_count" string="Leads"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_lead_source_form" model="ir.ui.view">
+        <field name="name">sa.lead.source.form</field>
+        <field name="model">sa.lead.source</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_quick_import" type="object"
+                            string="Quick Import" class="btn-primary"/>
+                    <button name="action_rotate_token" type="object"
+                            string="Rotate Token"
+                            confirm="Rotating the token invalidates the current webhook URL. Continue?"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_leads" type="object"
+                                class="oe_stat_button" icon="fa-users">
+                            <field name="lead_count" widget="statinfo" string="Leads"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Meta Lead Ads - DHA Campaign"/></h1>
+                    </div>
+                    <group>
+                        <group string="Integration">
+                            <field name="platform"/>
+                            <field name="user_id"/>
+                            <field name="api_key" password="True"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Lead Routing">
+                            <field name="create_as_opportunity"/>
+                            <field name="team_id"/>
+                            <field name="lead_user_id"/>
+                            <field name="tag_ids" widget="many2many_tags"/>
+                            <field name="utm_source_id"/>
+                            <field name="utm_medium_id"/>
+                        </group>
+                    </group>
+                    <group string="Webhook">
+                        <field name="webhook_url" widget="CopyClipboardChar"/>
+                        <div class="text-muted" colspan="2">
+                            Point your platform (Meta Lead Ads, Apollo, Zapier/Make,
+                            website form) at this URL. POST a JSON body with any of:
+                            <code>name / full_name</code>, <code>email</code>,
+                            <code>phone</code>, <code>company</code>,
+                            <code>message</code>. Each POST creates a CRM lead.
+                        </div>
+                    </group>
+                    <group string="Notes">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sa_lead_source" model="ir.actions.act_window">
+        <field name="name">Lead Sources</field>
+        <field name="res_model">sa.lead.source</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect a lead source</p>
+            <p>Create a source for Meta, Apollo, Zapier or your website to capture
+               leads straight into the CRM pipeline via a secure webhook URL.</p>
+        </field>
+    </record>
+
+</odoo>

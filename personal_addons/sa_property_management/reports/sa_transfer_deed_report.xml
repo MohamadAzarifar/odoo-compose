@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_sa_transfer_deed" model="ir.actions.report">
+        <field name="name">Transfer Deed</field>
+        <field name="model">sa.property.transfer</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sa_property_management.report_sa_transfer_deed_document</field>
+        <field name="report_file">sa_property_management.report_sa_transfer_deed_document</field>
+        <field name="binding_model_id" ref="model_sa_property_transfer"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Transfer - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_sa_transfer_deed_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">Transfer Deed</h2>
+                        <h4 class="text-center" t-field="o.name"/>
+
+                        <div class="row mt32">
+                            <div class="col-6">
+                                <h5>Transferor (Seller)</h5>
+                                <div t-field="o.from_partner_id"/>
+                                <div t-field="o.from_partner_id.sa_cnic"/>
+                                <div t-field="o.from_partner_id.phone"/>
+                            </div>
+                            <div class="col-6">
+                                <h5>Transferee (Buyer)</h5>
+                                <div t-field="o.to_partner_id"/>
+                                <div t-field="o.to_partner_id.sa_cnic"/>
+                                <div t-field="o.to_partner_id.phone"/>
+                            </div>
+                        </div>
+
+                        <div class="mt32">
+                            <h5>Property</h5>
+                            <table class="table table-sm">
+                                <tr><th>Property</th><td><span t-field="o.property_id.display_name"/></td></tr>
+                                <tr><th>Project</th><td><span t-field="o.project_id.name"/></td></tr>
+                                <tr><th>Type</th><td><span t-field="o.property_id.property_type"/></td></tr>
+                                <tr><th>Area</th>
+                                    <td>
+                                        <span t-field="o.property_id.area"/>
+                                        <span t-field="o.property_id.area_uom"/>
+                                    </td></tr>
+                                <tr><th>Block / Plot</th>
+                                    <td>
+                                        <span t-field="o.property_id.block"/> /
+                                        <span t-field="o.property_id.plot_number"/>
+                                    </td></tr>
+                            </table>
+                        </div>
+
+                        <div class="mt16">
+                            <h5>Financials</h5>
+                            <table class="table table-sm">
+                                <tr><th>Transfer Date</th><td><span t-field="o.transfer_date"/></td></tr>
+                                <tr><th>Sale Price</th>
+                                    <td><span t-field="o.sale_price"
+                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                                <tr><th>DC Value</th>
+                                    <td><span t-field="o.dc_value"
+                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                            </table>
+                        </div>
+
+                        <div class="mt16">
+                            <h5>Taxes</h5>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr><th>Tax</th><th>Payer</th><th class="text-end">Amount</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.tax_line_ids" t-as="t">
+                                        <td><span t-field="t.tax_id.name"/></td>
+                                        <td><span t-field="t.payer"/></td>
+                                        <td class="text-end">
+                                            <span t-field="t.amount"
+                                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt16">
+                            <h5>Misc Charges</h5>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr><th>Charge</th><th>Payer</th><th class="text-end">Amount</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.misc_line_ids" t-as="m">
+                                        <td><span t-field="m.charge_id.name"/></td>
+                                        <td><span t-field="m.payer"/></td>
+                                        <td class="text-end">
+                                            <span t-field="m.amount"
+                                                  t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt16">
+                            <h5>Summary</h5>
+                            <table class="table table-sm">
+                                <tr><th>Total Payable by Buyer</th>
+                                    <td class="text-end">
+                                        <span t-field="o.total_buyer"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td></tr>
+                                <tr><th>Net Receivable by Seller</th>
+                                    <td class="text-end">
+                                        <span t-field="o.net_to_seller"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td></tr>
+                            </table>
+                        </div>
+
+                        <div class="row mt64">
+                            <div class="col-6 text-center">
+                                ____________________________<br/>
+                                <strong>Transferor</strong>
+                            </div>
+                            <div class="col-6 text-center">
+                                ____________________________<br/>
+                                <strong>Transferee</strong>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

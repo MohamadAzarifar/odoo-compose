@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Default product used for property service invoices -->
+        <record id="product_sa_property_service" model="product.product">
+            <field name="name">Property Service Charge</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0.0</field>
+        </record>
+
+        <!-- Example service catalog entries -->
+        <record id="service_maintenance" model="sa.property.service">
+            <field name="name">Monthly Maintenance</field>
+            <field name="service_type">maintenance</field>
+            <field name="product_id" ref="product_sa_property_service"/>
+            <field name="recurrence">monthly</field>
+            <field name="default_price">5000.0</field>
+        </record>
+
+        <record id="service_electricity" model="sa.property.service">
+            <field name="name">Electricity Charges</field>
+            <field name="service_type">electricity</field>
+            <field name="product_id" ref="product_sa_property_service"/>
+            <field name="recurrence">monthly</field>
+            <field name="default_price">0.0</field>
+        </record>
+
+        <record id="service_amenity" model="sa.property.service">
+            <field name="name">Club / Amenity Subscription</field>
+            <field name="service_type">amenity</field>
+            <field name="product_id" ref="product_sa_property_service"/>
+            <field name="recurrence">yearly</field>
+            <field name="default_price">25000.0</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_deal_list" model="ir.ui.view">
+        <field name="name">sa.property.deal.list</field>
+        <field name="model">sa.property.deal</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'cancelled'"
+                  decoration-success="state == 'active'">
+                <field name="name"/>
+                <field name="deal_date"/>
+                <field name="investor_id"/>
+                <field name="property_count" string="Units"/>
+                <field name="sold_count" string="Sold"/>
+                <field name="advance_amount" sum="Advance"/>
+                <field name="total_commission" sum="Investor Earnings"/>
+                <field name="state" widget="badge"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_deal_form" model="ir.ui.view">
+        <field name="name">sa.property.deal.form</field>
+        <field name="model">sa.property.deal</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_activate" type="object" string="Activate"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_register_advance" type="object"
+                            string="Register Advance"
+                            invisible="state == 'cancelled' or advance_payment_id"/>
+                    <button name="action_close" type="object" string="Close Deal"
+                            invisible="state != 'active'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('cancelled', 'closed')"/>
+                    <button name="action_reset_to_draft" type="object"
+                            string="Reset to Draft" invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,active,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_properties" type="object"
+                                class="oe_stat_button" icon="fa-building">
+                            <field name="property_count" widget="statinfo" string="Units"/>
+                        </button>
+                        <button name="action_view_commissions" type="object"
+                                class="oe_stat_button" icon="fa-percent"
+                                invisible="commission_count == 0">
+                            <field name="commission_count" widget="statinfo" string="Commissions"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="investor_id"
+                                   readonly="state not in ('draft',)"/>
+                            <field name="deal_date"/>
+                            <field name="salesperson_id"/>
+                        </group>
+                        <group>
+                            <field name="advance_amount"
+                                   readonly="advance_payment_id"/>
+                            <field name="advance_payment_id" invisible="not advance_payment_id"/>
+                            <field name="currency_id"
+                                   groups="base.group_multi_currency"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Investor Earning">
+                        <field name="commission_basis"/>
+                        <field name="investor_commission_percent"
+                               invisible="commission_basis != 'percent'"/>
+                        <field name="investor_commission_fixed"
+                               invisible="commission_basis != 'fixed'"/>
+                        <field name="total_commission" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Allocated Units">
+                            <field name="property_ids">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="project_id"/>
+                                    <field name="base_price"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="note" placeholder="Deal notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_property_deal_search" model="ir.ui.view">
+        <field name="name">sa.property.deal.search</field>
+        <field name="model">sa.property.deal</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="investor_id"/>
+                <filter name="active" string="Active" domain="[('state', '=', 'active')]"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="closed" string="Closed" domain="[('state', '=', 'closed')]"/>
+                <group>
+                    <filter name="group_investor" string="Investor"
+                            context="{'group_by': 'investor_id'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_property_deal" model="ir.actions.act_window">
+        <field name="name">Investor Deals</field>
+        <field name="res_model">sa.property.deal</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first investor deal
+            </p>
+            <p>
+                Allocate property units to an investor, record the advance, and
+                let the system generate investor commissions when units sell.
+            </p>
+        </field>
+    </record>
+
+</odoo>

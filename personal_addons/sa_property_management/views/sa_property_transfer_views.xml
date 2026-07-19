@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_transfer_tree" model="ir.ui.view">
+        <field name="name">sa.property.transfer.tree</field>
+        <field name="model">sa.property.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Transfers" decoration-info="state == 'in_review'"
+                  decoration-success="state == 'completed'"
+                  decoration-warning="state == 'approved'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="transfer_date"/>
+                <field name="property_id"/>
+                <field name="from_partner_id"/>
+                <field name="to_partner_id"/>
+                <field name="sale_price" sum="Total"/>
+                <field name="amount_tax_buyer" optional="hide"/>
+                <field name="amount_misc_buyer" optional="hide"/>
+                <field name="total_buyer" optional="show" sum="Buyer Total"/>
+                <field name="net_to_seller" optional="show" sum="Net to Seller"/>
+                <field name="state" widget="badge"/>
+                <field name="currency_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_transfer_form" model="ir.ui.view">
+        <field name="name">sa.property.transfer.form</field>
+        <field name="model">sa.property.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Transfer">
+                <header>
+                    <button name="action_apply_default_taxes" type="object"
+                            string="Apply Default Taxes &amp; Charges"
+                            invisible="state != 'draft'"/>
+                    <button name="action_submit" type="object"
+                            string="Submit for Review" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve" type="object"
+                            string="Approve" class="btn-primary"
+                            invisible="state != 'in_review'"
+                            groups="sa_property_management.group_sa_property_manager"/>
+                    <button name="action_complete" type="object"
+                            string="Complete Transfer" class="btn-primary"
+                            invisible="state != 'approved'"
+                            groups="sa_property_management.group_sa_property_manager"/>
+                    <button name="action_verify_buyer_identity" type="object"
+                            string="Verify Identity"
+                            invisible="state in ('completed', 'cancelled') or not to_partner_id"/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel"
+                            invisible="state in ('cancelled', 'completed')"/>
+                    <button name="action_reset_to_draft" type="object"
+                            string="Reset to Draft"
+                            invisible="state != 'cancelled'"/>
+                    <button name="action_print_deed" type="object"
+                            string="Print Deed"
+                            invisible="state in ('draft', 'cancelled')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_review,approved,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_move" type="object"
+                                class="oe_stat_button" icon="fa-book"
+                                invisible="not move_id">
+                            <span class="o_stat_text">Journal Entry</span>
+                        </button>
+                        <button name="action_view_documents" type="object"
+                                class="oe_stat_button" icon="fa-folder-open-o">
+                            <field name="document_count" widget="statinfo" string="Documents"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="property_id" options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="project_id" readonly="1"/>
+                            <field name="from_partner_id" readonly="state != 'draft'"/>
+                            <field name="to_partner_id" readonly="state != 'draft'"/>
+                            <field name="to_partner_biometric_verified"
+                                   invisible="not to_partner_id"/>
+                            <field name="dealer_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="transfer_date" readonly="state != 'draft'"/>
+                            <field name="sale_price" readonly="state != 'draft'"/>
+                            <field name="dc_value" readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Taxes">
+                            <field name="tax_line_ids" readonly="state not in ('draft', 'in_review')">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="tax_id" options="{'no_create': True}"/>
+                                    <field name="payer"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Misc Charges">
+                            <field name="misc_line_ids" readonly="state not in ('draft', 'in_review')">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="charge_id" options="{'no_create': True}"/>
+                                    <field name="payer"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Summary">
+                            <group>
+                                <group string="Buyer Side">
+                                    <field name="amount_tax_buyer" readonly="1"/>
+                                    <field name="amount_misc_buyer" readonly="1"/>
+                                    <field name="total_buyer" readonly="1"
+                                           class="oe_subtotal_footer_separator"/>
+                                </group>
+                                <group string="Seller Side">
+                                    <field name="amount_tax_seller" readonly="1"/>
+                                    <field name="amount_misc_seller" readonly="1"/>
+                                    <field name="total_seller_deductions" readonly="1"/>
+                                    <field name="net_to_seller" readonly="1"
+                                           class="oe_subtotal_footer_separator"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Documentation" name="documentation">
+                            <group>
+                                <group>
+                                    <field name="checklist_progress" widget="progressbar"/>
+                                    <field name="checklist_done"/>
+                                    <field name="checklist_total"/>
+                                    <field name="checklist_complete"/>
+                                </group>
+                                <group>
+                                    <button name="action_load_default_checklist"
+                                            type="object" string="Load Standard Checklist"
+                                            class="btn-secondary" icon="fa-list-ul"
+                                            invisible="state in ('completed', 'cancelled')"/>
+                                </group>
+                            </group>
+                            <field name="checklist_ids"
+                                   readonly="state in ('completed', 'cancelled')">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="responsible"/>
+                                    <field name="required"/>
+                                    <field name="is_done" widget="boolean_toggle"/>
+                                    <field name="received_date"/>
+                                    <field name="document_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="note"/>
+                                    <field name="property_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_property_transfer_search" model="ir.ui.view">
+        <field name="name">sa.property.transfer.search</field>
+        <field name="model">sa.property.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Transfers">
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="project_id"/>
+                <field name="from_partner_id"/>
+                <field name="to_partner_id"/>
+                <field name="dealer_id"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="In Review" name="in_review" domain="[('state', '=', 'in_review')]"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Completed" name="completed" domain="[('state', '=', 'completed')]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <group>
+                    <filter string="Property" name="grp_property" context="{'group_by': 'property_id'}"/>
+                    <filter string="Project" name="grp_project" context="{'group_by': 'project_id'}"/>
+                    <filter string="Seller" name="grp_seller" context="{'group_by': 'from_partner_id'}"/>
+                    <filter string="Buyer" name="grp_buyer" context="{'group_by': 'to_partner_id'}"/>
+                    <filter string="State" name="grp_state" context="{'group_by': 'state'}"/>
+                    <filter string="Transfer Month" name="grp_date" context="{'group_by': 'transfer_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_property_transfer" model="ir.actions.act_window">
+        <field name="name">Property Transfers</field>
+        <field name="res_model">sa.property.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sa_property_transfer_search"/>
+        <field name="context">{'search_default_grp_property': 1}</field>
+    </record>
+
+</odoo>

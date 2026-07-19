@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_sa_payment_schedule" model="ir.actions.report">
+        <field name="name">Payment Schedule</field>
+        <field name="model">sa.property.booking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sa_property_management.report_sa_payment_schedule_document</field>
+        <field name="report_file">sa_property_management.report_sa_payment_schedule_document</field>
+        <field name="binding_model_id" ref="model_sa_property_booking"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Schedule - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_sa_payment_schedule_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Payment Schedule</h2>
+                        <h4>
+                            <span t-field="o.name"/> -
+                            <span t-field="o.property_id.display_name"/>
+                        </h4>
+                        <div class="row mt16 mb16">
+                            <div class="col-6">
+                                <strong>Customer:</strong> <span t-field="o.customer_id"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Total Price:</strong>
+                                <span t-field="o.total_price"
+                                      t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            </div>
+                        </div>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Due Date</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Paid</th>
+                                    <th class="text-end">Residual</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.installment_ids.sorted('sequence')" t-as="line">
+                                    <td><span t-field="line.sequence"/></td>
+                                    <td><span t-field="line.name"/></td>
+                                    <td><span t-field="line.line_type"/></td>
+                                    <td><span t-field="line.due_date"/></td>
+                                    <td class="text-end">
+                                        <span t-field="line.amount"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="line.amount_paid"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="line.amount_residual"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                    <td><span t-field="line.state"/></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" class="text-end">Total</th>
+                                    <th class="text-end">
+                                        <span t-esc="sum(o.installment_ids.mapped('amount'))"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </th>
+                                    <th class="text-end">
+                                        <span t-esc="sum(o.installment_ids.mapped('amount_paid'))"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </th>
+                                    <th class="text-end">
+                                        <span t-esc="sum(o.installment_ids.mapped('amount_residual'))"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </th>
+                                    <th/>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

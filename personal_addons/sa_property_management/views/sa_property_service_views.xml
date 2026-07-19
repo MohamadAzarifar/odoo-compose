@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===== Service Catalog ===== -->
+    <record id="view_sa_property_service_list" model="ir.ui.view">
+        <field name="name">sa.property.service.list</field>
+        <field name="model">sa.property.service</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="service_type"/>
+                <field name="product_id"/>
+                <field name="recurrence"/>
+                <field name="default_price"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_service_form" model="ir.ui.view">
+        <field name="name">sa.property.service.form</field>
+        <field name="model">sa.property.service</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Monthly Maintenance"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="service_type"/>
+                            <field name="product_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="recurrence"/>
+                            <field name="default_price"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sa_property_service" model="ir.actions.act_window">
+        <field name="name">Services &amp; Charges</field>
+        <field name="res_model">sa.property.service</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Define a billable service</p>
+            <p>Amenities, subscriptions, maintenance, electricity and other
+               recurring charges you bill to property customers.</p>
+        </field>
+    </record>
+
+    <!-- ===== Service Assignments ===== -->
+    <record id="view_sa_service_assignment_list" model="ir.ui.view">
+        <field name="name">sa.property.service.assignment.list</field>
+        <field name="model">sa.property.service.assignment</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state != 'running'" decoration-danger="state == 'running' and next_invoice_date and next_invoice_date &lt; current_date">
+                <field name="name"/>
+                <field name="service_id"/>
+                <field name="property_id"/>
+                <field name="customer_id"/>
+                <field name="recurrence"/>
+                <field name="price"/>
+                <field name="next_invoice_date"/>
+                <field name="invoice_count" string="Invoices"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'running'"
+                       decoration-muted="state in ('stopped', 'expired')"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_service_assignment_form" model="ir.ui.view">
+        <field name="name">sa.property.service.assignment.form</field>
+        <field name="model">sa.property.service.assignment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate_invoice" type="object"
+                            string="Generate Invoice Now" class="btn-primary"
+                            invisible="state != 'running'"/>
+                    <button name="action_stop" type="object" string="Stop"
+                            invisible="state != 'running'"/>
+                    <button name="action_resume" type="object" string="Resume"
+                            invisible="state == 'running'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="running,expired"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoices" type="object"
+                                class="oe_stat_button" icon="fa-pencil-square-o">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="service_id"/>
+                            <field name="service_type" readonly="1"/>
+                            <field name="property_id"/>
+                            <field name="customer_id"/>
+                            <field name="price"/>
+                            <field name="currency_id" options="{'no_create': True}"
+                                   groups="base.group_multi_currency"/>
+                        </group>
+                        <group>
+                            <field name="recurrence"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="next_invoice_date"/>
+                            <field name="last_invoice_date"/>
+                            <field name="payment_term_id" options="{'no_create': True}"/>
+                            <field name="auto_post"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_service_assignment_search" model="ir.ui.view">
+        <field name="name">sa.property.service.assignment.search</field>
+        <field name="model">sa.property.service.assignment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="service_id"/>
+                <field name="property_id"/>
+                <field name="customer_id"/>
+                <field name="project_id"/>
+                <filter name="running" string="Running" domain="[('state', '=', 'running')]"/>
+                <filter name="due" string="Due Now"
+                        domain="[('state', '=', 'running'), ('next_invoice_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="electricity" string="Electricity" domain="[('service_type', '=', 'electricity')]"/>
+                <filter name="maintenance" string="Maintenance" domain="[('service_type', '=', 'maintenance')]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_type" string="Service Type" context="{'group_by': 'service_type'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_service_assignment" model="ir.actions.act_window">
+        <field name="name">Service Billing</field>
+        <field name="res_model">sa.property.service.assignment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sa_service_assignment_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Assign a recurring service bill</p>
+            <p>Attach amenities, maintenance or utility charges to a property and
+               let the scheduler invoice the customer automatically each cycle.</p>
+        </field>
+    </record>
+
+</odoo>

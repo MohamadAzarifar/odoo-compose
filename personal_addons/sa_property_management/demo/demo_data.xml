@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Sample dealer partner -->
+        <record id="demo_dealer_partner" model="res.partner">
+            <field name="name">Al-Karim Estate (Demo)</field>
+            <field name="is_company" eval="True"/>
+            <field name="city">Lahore</field>
+            <field name="phone">+92-300-1234567</field>
+            <field name="email">dealer@example.com</field>
+            <field name="sa_cnic">35201-1234567-1</field>
+            <field name="sa_ntn">1234567-8</field>
+        </record>
+
+        <record id="demo_dealer" model="sa.property.dealer">
+            <field name="partner_id" ref="demo_dealer_partner"/>
+            <field name="commission_percent">2.0</field>
+        </record>
+
+        <!-- Sample customer -->
+        <record id="demo_customer" model="res.partner">
+            <field name="name">Ahmed Hassan (Demo Customer)</field>
+            <field name="city">Lahore</field>
+            <field name="phone">+92-321-9876543</field>
+            <field name="email">ahmed@example.com</field>
+            <field name="sa_cnic">35202-7654321-5</field>
+            <field name="sa_is_property_customer" eval="True"/>
+        </record>
+
+        <!-- Sample project -->
+        <record id="demo_project" model="sa.property.project">
+            <field name="name">Bahria Town - Sector C (Demo)</field>
+            <field name="code">BT-C</field>
+            <field name="city">Lahore</field>
+            <field name="total_area">500</field>
+            <field name="area_uom">kanal</field>
+            <field name="dealer_ids" eval="[(4, ref('demo_dealer'))]"/>
+        </record>
+
+        <!-- Sample property -->
+        <record id="demo_property_1" model="sa.property">
+            <field name="name">10 Marla Residential Plot</field>
+            <field name="project_id" ref="demo_project"/>
+            <field name="property_type">plot</field>
+            <field name="block">C</field>
+            <field name="plot_number">122</field>
+            <field name="area">10</field>
+            <field name="area_uom">marla</field>
+            <field name="facing">east</field>
+            <field name="location_premium">park_facing</field>
+            <field name="base_price">15000000.0</field>
+            <field name="dc_value">12000000.0</field>
+            <field name="state">available</field>
+        </record>
+
+        <!-- Sample payment plan -->
+        <record id="demo_payment_plan" model="sa.payment.plan">
+            <field name="name">3-Year Standard Plan (20% Down, 36 Monthly, 10% Possession)</field>
+            <field name="code">PLAN-3Y-STD</field>
+            <field name="down_payment_percent">20.0</field>
+            <field name="installment_count">36</field>
+            <field name="frequency">monthly</field>
+            <field name="on_possession_percent">10.0</field>
+        </record>
+
+        <record id="demo_payment_plan_line_1" model="sa.payment.plan.line">
+            <field name="plan_id" ref="demo_payment_plan"/>
+            <field name="name">Balloon Payment (Month 12)</field>
+            <field name="after_installment">12</field>
+            <field name="percent">5.0</field>
+        </record>
+
+        <record id="demo_payment_plan_line_2" model="sa.payment.plan.line">
+            <field name="plan_id" ref="demo_payment_plan"/>
+            <field name="name">Balloon Payment (Month 24)</field>
+            <field name="after_installment">24</field>
+            <field name="percent">5.0</field>
+        </record>
+
+    </data>
+</odoo>

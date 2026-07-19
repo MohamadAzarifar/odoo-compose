@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================
+             Country-aware property transfer tax presets.
+             Each tax is tagged with a country (res.country) and is only
+             auto-applied when it matches the operating country configured
+             in Property Management settings (or has no country = global).
+             Accounts are NOT pre-set: wire each tax to an account via
+             Property Management > Configuration > Transfer Taxes.
+             Typical/illustrative rates — review against current local law.
+             ============================================================ -->
+
+        <!-- ===================== Pakistan ===================== -->
+        <record id="tax_cvt" model="sa.transfer.tax">
+            <field name="name">Capital Value Tax (CVT)</field>
+            <field name="code">CVT</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="sequence">10</field>
+            <field name="computation">percent_dc</field>
+            <field name="rate">2.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_stamp_duty" model="sa.transfer.tax">
+            <field name="name">Stamp Duty</field>
+            <field name="code">STAMP</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="sequence">20</field>
+            <field name="computation">percent_dc</field>
+            <field name="rate">3.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_registration_fee" model="sa.transfer.tax">
+            <field name="name">Registration Fee</field>
+            <field name="code">REG</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="sequence">30</field>
+            <field name="computation">percent_dc</field>
+            <field name="rate">1.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_fbr_236k_filer" model="sa.transfer.tax">
+            <field name="name">FBR Tax 236K (Filer - Buyer)</field>
+            <field name="code">FBR236K</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="sequence">40</field>
+            <field name="computation">percent_dc</field>
+            <field name="rate">3.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_fbr_236c_filer" model="sa.transfer.tax">
+            <field name="name">FBR Tax 236C (Filer - Seller)</field>
+            <field name="code">FBR236C</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="sequence">50</field>
+            <field name="computation">percent_dc</field>
+            <field name="rate">3.0</field>
+            <field name="payer">seller</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_capital_gains" model="sa.transfer.tax">
+            <field name="name">Capital Gains Tax (CGT)</field>
+            <field name="code">CGT</field>
+            <field name="country_id" ref="base.pk"/>
+            <field name="sequence">60</field>
+            <field name="computation">percent</field>
+            <field name="rate">5.0</field>
+            <field name="payer">seller</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <!-- ===================== India ===================== -->
+        <record id="tax_in_stamp_duty" model="sa.transfer.tax">
+            <field name="name">Stamp Duty</field>
+            <field name="code">IN_STAMP</field>
+            <field name="country_id" ref="base.in"/>
+            <field name="sequence">10</field>
+            <field name="computation">percent</field>
+            <field name="rate">5.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_in_registration" model="sa.transfer.tax">
+            <field name="name">Registration Charges</field>
+            <field name="code">IN_REG</field>
+            <field name="country_id" ref="base.in"/>
+            <field name="sequence">20</field>
+            <field name="computation">percent</field>
+            <field name="rate">1.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_in_tds" model="sa.transfer.tax">
+            <field name="name">TDS on Property (Sec. 194-IA)</field>
+            <field name="code">IN_TDS</field>
+            <field name="country_id" ref="base.in"/>
+            <field name="sequence">30</field>
+            <field name="computation">percent</field>
+            <field name="rate">1.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <!-- ===================== United States ===================== -->
+        <record id="tax_us_transfer" model="sa.transfer.tax">
+            <field name="name">Real Estate Transfer Tax</field>
+            <field name="code">US_TRANSFER</field>
+            <field name="country_id" ref="base.us"/>
+            <field name="sequence">10</field>
+            <field name="computation">percent</field>
+            <field name="rate">1.0</field>
+            <field name="payer">seller</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_us_recording" model="sa.transfer.tax">
+            <field name="name">Deed Recording Fee</field>
+            <field name="code">US_RECORD</field>
+            <field name="country_id" ref="base.us"/>
+            <field name="sequence">20</field>
+            <field name="computation">fixed</field>
+            <field name="fixed_amount">125.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <!-- ===================== United Kingdom ===================== -->
+        <record id="tax_uk_sdlt" model="sa.transfer.tax">
+            <field name="name">Stamp Duty Land Tax (SDLT)</field>
+            <field name="code">UK_SDLT</field>
+            <field name="country_id" ref="base.uk"/>
+            <field name="sequence">10</field>
+            <field name="computation">percent</field>
+            <field name="rate">5.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_uk_land_reg" model="sa.transfer.tax">
+            <field name="name">Land Registry Fee</field>
+            <field name="code">UK_LANDREG</field>
+            <field name="country_id" ref="base.uk"/>
+            <field name="sequence">20</field>
+            <field name="computation">fixed</field>
+            <field name="fixed_amount">270.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <!-- ===================== United Arab Emirates ===================== -->
+        <record id="tax_ae_transfer" model="sa.transfer.tax">
+            <field name="name">DLD Property Transfer Fee</field>
+            <field name="code">AE_DLD</field>
+            <field name="country_id" ref="base.ae"/>
+            <field name="sequence">10</field>
+            <field name="computation">percent</field>
+            <field name="rate">4.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <!-- ===================== Saudi Arabia ===================== -->
+        <record id="tax_sa_rett" model="sa.transfer.tax">
+            <field name="name">Real Estate Transaction Tax (RETT)</field>
+            <field name="code">SA_RETT</field>
+            <field name="country_id" ref="base.sa"/>
+            <field name="sequence">10</field>
+            <field name="computation">percent</field>
+            <field name="rate">5.0</field>
+            <field name="payer">seller</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <!-- ===================== Australia ===================== -->
+        <record id="tax_au_stamp" model="sa.transfer.tax">
+            <field name="name">Stamp Duty (Transfer Duty)</field>
+            <field name="code">AU_STAMP</field>
+            <field name="country_id" ref="base.au"/>
+            <field name="sequence">10</field>
+            <field name="computation">percent</field>
+            <field name="rate">4.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+        <record id="tax_au_registration" model="sa.transfer.tax">
+            <field name="name">Land Transfer Registration Fee</field>
+            <field name="code">AU_REG</field>
+            <field name="country_id" ref="base.au"/>
+            <field name="sequence">20</field>
+            <field name="computation">fixed</field>
+            <field name="fixed_amount">150.0</field>
+            <field name="payer">buyer</field>
+            <field name="property_type_filter">all</field>
+        </record>
+
+    </data>
+</odoo>

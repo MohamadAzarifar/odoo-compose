@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_transfer_wizard_form" model="ir.ui.view">
+        <field name="name">sa.property.transfer.wizard.form</field>
+        <field name="model">sa.property.transfer.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Initiate Property Transfer">
+                <group>
+                    <group>
+                        <field name="property_id" options="{'no_create': True}"/>
+                        <field name="from_partner_id"/>
+                        <field name="to_partner_id"/>
+                    </group>
+                    <group>
+                        <field name="transfer_date"/>
+                        <field name="sale_price"/>
+                        <field name="dc_value"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_create" type="object"
+                            string="Create Transfer" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sa_property_transfer_wizard" model="ir.actions.act_window">
+        <field name="name">Transfer Property</field>
+        <field name="res_model">sa.property.transfer.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

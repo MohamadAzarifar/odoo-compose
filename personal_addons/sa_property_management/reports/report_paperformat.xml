@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Use Odoo's built-in A4 paper format. This file is a placeholder
+         that lets us reference a paperformat in report records if we later
+         add custom margins. Intentionally empty <data/> to avoid
+         creating duplicates. -->
+    <data/>
+</odoo>

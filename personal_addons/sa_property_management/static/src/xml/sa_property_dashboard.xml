@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="sa_property_management.Dashboard">
+    <div class="o_sa_dashboard" t-ref="root" t-att-class="{ 'o_sa_editing': state.editMode }">
+        <!-- Header -->
+        <div class="o_sa_dashboard_header">
+            <div>
+                <h1>Property Management Dashboard</h1>
+                <div class="o_sa_dashboard_subtitle" t-if="state.data">
+                    As of <t t-esc="state.data.today"/>
+                    <span t-if="hasActiveFilters" class="o_sa_filter_chip">
+                        <i class="fa fa-filter me-1"/>Filtered
+                    </span>
+                </div>
+            </div>
+            <div class="o_sa_header_actions" t-if="!state.loading and state.layout">
+                <button class="btn btn-light" t-on-click="() =&gt; this.refresh()">
+                    <i class="fa fa-refresh me-1"/> Refresh
+                </button>
+                <button class="btn"
+                        t-att-class="state.editMode ? 'btn-secondary' : 'btn-primary'"
+                        t-on-click="() =&gt; this.toggleEdit()">
+                    <i class="fa fa-sliders me-1"/>
+                    <t t-esc="state.editMode ? 'Close Editor' : 'Customize'"/>
+                </button>
+            </div>
+        </div>
+
+        <!-- Customization drawer -->
+        <t t-if="state.editMode and state.layout and state.meta">
+            <div class="o_sa_editor">
+                <div class="o_sa_editor_head">
+                    <h4><i class="fa fa-sliders me-2"/>Customize Dashboard</h4>
+                    <button class="btn btn-sm btn-light" t-on-click="() =&gt; this.toggleEdit()">
+                        <i class="fa fa-times"/>
+                    </button>
+                </div>
+
+                <div class="o_sa_editor_grid">
+                    <!-- Filters -->
+                    <div class="o_sa_editor_panel">
+                        <h6>Scope &amp; Filters</h6>
+                        <label class="o_sa_field_label">Projects</label>
+                        <div class="o_sa_chip_list">
+                            <t t-foreach="state.meta.projects" t-as="p" t-key="p.id">
+                                <button class="o_sa_chip"
+                                        t-att-class="{ 'o_sa_chip_on': isProjectOn(p.id) }"
+                                        t-on-click="() =&gt; this.toggleProject(p.id)">
+                                    <t t-esc="p.name"/>
+                                </button>
+                            </t>
+                            <span t-if="!state.meta.projects.length" class="text-muted small">No projects.</span>
+                        </div>
+                        <div class="o_sa_date_row">
+                            <div>
+                                <label class="o_sa_field_label">From</label>
+                                <input type="date" class="form-control form-control-sm"
+                                       t-att-value="state.layout.filters.date_from or ''"
+                                       t-on-change="(ev) =&gt; this.setDateFrom(ev)"/>
+                            </div>
+                            <div>
+                                <label class="o_sa_field_label">To</label>
+                                <input type="date" class="form-control form-control-sm"
+                                       t-att-value="state.layout.filters.date_to or ''"
+                                       t-on-change="(ev) =&gt; this.setDateTo(ev)"/>
+                            </div>
+                        </div>
+                        <div class="o_sa_editor_btns">
+                            <button class="btn btn-sm btn-primary" t-on-click="() =&gt; this.applyFilters()">
+                                Apply Filters
+                            </button>
+                            <button class="btn btn-sm btn-light" t-on-click="() =&gt; this.clearFilters()">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- KPIs -->
+                    <div class="o_sa_editor_panel">
+                        <h6>KPI Tiles</h6>
+                        <div class="o_sa_check_list">
+                            <t t-foreach="state.meta.kpi_catalog" t-as="k" t-key="k.key">
+                                <label class="o_sa_check">
+                                    <input type="checkbox" t-att-checked="isKpiOn(k.key)"
+                                           t-on-change="() =&gt; this.toggleKpi(k.key)"/>
+                                    <span t-esc="k.label"/>
+                                </label>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Sections -->
+                    <div class="o_sa_editor_panel">
+                        <h6>Sections <small class="text-muted">(drag to reorder)</small></h6>
+                        <div class="o_sa_section_list">
+                            <t t-foreach="orderedSections" t-as="s" t-key="s.id">
+                                <div class="o_sa_section_item" draggable="true"
+                                     t-on-dragstart="() =&gt; this.onSectionDragStart(s_index)"
+                                     t-on-dragover="(ev) =&gt; this.onSectionDragOver(ev)"
+                                     t-on-drop="() =&gt; this.onSectionDrop(s_index)">
+                                    <span class="o_sa_drag_handle"><i class="fa fa-bars"/></span>
+                                    <label class="o_sa_check flex-grow-1">
+                                        <input type="checkbox" t-att-checked="s.visible"
+                                               t-on-change="() =&gt; this.toggleSection(s.id)"/>
+                                        <span t-esc="s.label"/>
+                                    </label>
+                                    <span class="o_sa_move_btns">
+                                        <button class="btn btn-sm btn-light"
+                                                t-on-click="() =&gt; this.moveSection(s_index, s_index - 1)">
+                                            <i class="fa fa-chevron-up"/>
+                                        </button>
+                                        <button class="btn btn-sm btn-light"
+                                                t-on-click="() =&gt; this.moveSection(s_index, s_index + 1)">
+                                            <i class="fa fa-chevron-down"/>
+                                        </button>
+                                    </span>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Custom widget builder -->
+                    <div class="o_sa_editor_panel">
+                        <h6>Custom Widgets</h6>
+                        <label class="o_sa_field_label">Title</label>
+                        <input type="text" class="form-control form-control-sm"
+                               placeholder="e.g. Bookings by Project"
+                               t-model="state.draft.title"/>
+                        <label class="o_sa_field_label">Source</label>
+                        <select class="form-select form-select-sm"
+                                t-att-value="state.draft.model"
+                                t-on-change="(ev) =&gt; this.onDraftModelChange(ev)">
+                            <option value="">Select data source…</option>
+                            <t t-foreach="state.meta.widget_models" t-as="m" t-key="m.model">
+                                <option t-att-value="m.model" t-esc="m.label"/>
+                            </t>
+                        </select>
+                        <t t-if="draftModelSpec">
+                            <label class="o_sa_field_label">Measure</label>
+                            <select class="form-select form-select-sm" t-model="state.draft.measure">
+                                <t t-foreach="draftModelSpec.measures" t-as="me" t-key="me.value">
+                                    <option t-att-value="me.value" t-esc="me.label"/>
+                                </t>
+                            </select>
+                            <label class="o_sa_field_label">Group By</label>
+                            <select class="form-select form-select-sm" t-model="state.draft.group_by">
+                                <t t-foreach="draftModelSpec.groupbys" t-as="g" t-key="g.value">
+                                    <option t-att-value="g.value" t-esc="g.label"/>
+                                </t>
+                            </select>
+                            <label class="o_sa_field_label">Chart Type</label>
+                            <select class="form-select form-select-sm" t-model="state.draft.chart">
+                                <t t-foreach="state.meta.chart_types" t-as="c" t-key="c.value">
+                                    <option t-att-value="c.value" t-esc="c.label"/>
+                                </t>
+                            </select>
+                        </t>
+                        <div class="o_sa_editor_btns">
+                            <button class="btn btn-sm btn-primary" t-on-click="() =&gt; this.addCustomWidget()">
+                                <i class="fa fa-plus me-1"/>Add Widget
+                            </button>
+                        </div>
+                        <div class="o_sa_widget_chips" t-if="state.layout.custom_widgets.length">
+                            <t t-foreach="state.layout.custom_widgets" t-as="w" t-key="w.id">
+                                <span class="o_sa_chip o_sa_chip_on">
+                                    <t t-esc="w.title or w.model"/>
+                                    <i class="fa fa-times ms-2" t-on-click="() =&gt; this.removeCustomWidget(w.id)"/>
+                                </span>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_sa_editor_footer">
+                    <button class="btn btn-success" t-att-disabled="state.saving"
+                            t-on-click="() =&gt; this.saveLayout()">
+                        <i class="fa fa-check me-1"/>Save My Dashboard
+                    </button>
+                    <button t-if="state.isManager" class="btn btn-outline-primary"
+                            t-att-disabled="state.saving"
+                            t-on-click="() =&gt; this.saveAsDefault()">
+                        <i class="fa fa-users me-1"/>Save as Company Default
+                    </button>
+                    <button class="btn btn-light" t-on-click="() =&gt; this.resetLayout()">
+                        <i class="fa fa-undo me-1"/>Reset to Default
+                    </button>
+                </div>
+            </div>
+        </t>
+
+        <!-- Loading -->
+        <div t-if="state.loading" class="o_sa_dashboard_loading">
+            <i class="fa fa-spinner fa-spin fa-2x"/>
+            <div class="mt-2">Loading dashboard data…</div>
+        </div>
+
+        <!-- Error -->
+        <div t-if="state.error" class="alert alert-danger">
+            <strong>Could not load dashboard:</strong>
+            <pre class="mb-0" t-esc="state.error"/>
+        </div>
+
+        <!-- Body -->
+        <t t-if="!state.loading and state.data">
+
+            <!-- KPI strip (customizable) -->
+            <div class="o_sa_kpi_grid">
+                <t t-foreach="visibleKpis" t-as="kpi" t-key="kpi.key">
+                    <div class="o_sa_kpi" t-att-class="kpi.cls"
+                         t-on-click="() =&gt; this.onKpiClick(kpi.key)">
+                        <div class="o_sa_kpi_icon"><i class="fa" t-att-class="kpi.icon"/></div>
+                        <div>
+                            <div class="o_sa_kpi_value">
+                                <t t-esc="kpi.value"/>
+                                <span t-if="kpi.pct !== null" class="o_sa_kpi_pct"> (<t t-esc="kpi.pct"/>%)</span>
+                            </div>
+                            <div class="o_sa_kpi_label" t-esc="kpi.label"/>
+                        </div>
+                    </div>
+                </t>
+                <div t-if="!visibleKpis.length" class="text-muted small py-2">
+                    No KPI tiles selected. Use <strong>Customize</strong> to add some.
+                </div>
+            </div>
+
+            <!-- Ordered, toggleable sections -->
+            <t t-foreach="orderedSections" t-as="section" t-key="section.id">
+            <t t-if="section.visible">
+
+            <!-- Financial Summary -->
+            <t t-if="section.id === 'financials'">
+            <div class="o_sa_kpi_grid o_sa_kpi_grid_money">
+                <div class="o_sa_money_card o_sa_money_blue">
+                    <div class="o_sa_money_label">Sales Value</div>
+                    <div class="o_sa_money_value" t-esc="fmtCompactMoney(state.data.kpi.sales_value)"/>
+                    <div class="o_sa_money_sub">Non-cancelled bookings</div>
+                </div>
+                <div class="o_sa_money_card o_sa_money_indigo">
+                    <div class="o_sa_money_label">Invoiced</div>
+                    <div class="o_sa_money_value" t-esc="fmtCompactMoney(state.data.kpi.invoiced)"/>
+                    <div class="o_sa_money_sub">Posted invoices</div>
+                </div>
+                <div class="o_sa_money_card o_sa_money_green">
+                    <div class="o_sa_money_label">Collected</div>
+                    <div class="o_sa_money_value" t-esc="fmtCompactMoney(state.data.kpi.collected)"/>
+                    <div class="o_sa_money_sub">
+                        Collection rate <strong><t t-esc="state.data.kpi.collection_rate"/>%</strong>
+                    </div>
+                </div>
+                <div class="o_sa_money_card o_sa_money_amber">
+                    <div class="o_sa_money_label">Outstanding</div>
+                    <div class="o_sa_money_value" t-esc="fmtCompactMoney(state.data.kpi.outstanding)"/>
+                    <div class="o_sa_money_sub">Receivables open</div>
+                </div>
+                <div class="o_sa_money_card o_sa_money_red" t-on-click="() =&gt; this.openOverdue()">
+                    <div class="o_sa_money_label">Overdue</div>
+                    <div class="o_sa_money_value" t-esc="fmtCompactMoney(state.data.kpi.overdue_amount)"/>
+                    <div class="o_sa_money_sub">
+                        <strong><t t-esc="state.data.kpi.overdue_count"/></strong> installment(s) past due
+                    </div>
+                </div>
+                <div class="o_sa_money_card o_sa_money_slate" t-on-click="() =&gt; this.openUpcoming()">
+                    <div class="o_sa_money_label">Due Soon</div>
+                    <div class="o_sa_money_value">
+                        <t t-esc="state.data.kpi.due_next_7"/> / <t t-esc="state.data.kpi.due_next_30"/>
+                    </div>
+                    <div class="o_sa_money_sub">Next 7 / 30 days</div>
+                </div>
+            </div>
+            </t>
+
+            <!-- Section: Inventory -->
+            <t t-if="section.id === 'inventory'">
+            <div class="o_sa_section_title">Inventory Overview</div>
+            <div class="o_sa_chart_grid">
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Properties by Status</h5>
+                        <small class="text-muted">Click a slice to drill down</small>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="propertyStateChart"/></div>
+                </div>
+
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Property Mix by Type</h5>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="propertyTypeChart"/></div>
+                </div>
+
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Transfers by Status</h5>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="transferStateChart"/></div>
+                </div>
+
+                <div class="o_sa_card o_sa_span_8">
+                    <div class="o_sa_card_header">
+                        <h5>Inventory per Project</h5>
+                        <small class="text-muted">Stacked counts — top 10 projects by size</small>
+                    </div>
+                    <div class="o_sa_chart_box o_sa_chart_tall"><canvas t-ref="projectInventoryChart"/></div>
+                </div>
+
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Transfer Tax Breakdown</h5>
+                        <small class="text-muted">By tax type</small>
+                    </div>
+                    <div class="o_sa_chart_box o_sa_chart_tall"><canvas t-ref="transferTaxChart"/></div>
+                </div>
+            </div>
+            </t>
+
+            <!-- Section: Sales / Bookings -->
+            <t t-if="section.id === 'sales'">
+            <div class="o_sa_section_title">Sales &amp; Bookings</div>
+            <div class="o_sa_chart_grid">
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Bookings by Status</h5>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="bookingStateChart"/></div>
+                </div>
+
+                <div class="o_sa_card o_sa_span_8">
+                    <div class="o_sa_card_header">
+                        <h5>Booking Trend</h5>
+                        <small class="text-muted">Last 12 months — count vs value</small>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="bookingTrendChart"/></div>
+                </div>
+            </div>
+            </t>
+
+            <!-- Section: Receivables -->
+            <t t-if="section.id === 'receivables'">
+            <div class="o_sa_section_title">Receivables &amp; Collections</div>
+            <div class="o_sa_chart_grid">
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Installments by Status</h5>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="installmentStateChart"/></div>
+                </div>
+
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Overdue Aging</h5>
+                        <small class="text-muted">Days past due</small>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="agingChart"/></div>
+                </div>
+
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Due vs Collected</h5>
+                        <small class="text-muted">Last 12 months</small>
+                    </div>
+                    <div class="o_sa_chart_box"><canvas t-ref="collectionTrendChart"/></div>
+                </div>
+            </div>
+            </t>
+
+            <!-- Receivable vs Received -->
+            <t t-if="section.id === 'recv_compare'">
+            <div class="o_sa_section_title">Receivable vs Received</div>
+            <div class="o_sa_chart_grid">
+                <div class="o_sa_card o_sa_span_8">
+                    <div class="o_sa_card_header">
+                        <h5>Receivable vs Received</h5>
+                        <small class="text-muted">Per project — received vs outstanding</small>
+                    </div>
+                    <div class="o_sa_chart_box o_sa_chart_tall"><canvas t-ref="receivableVsReceivedChart"/></div>
+                </div>
+                <div class="o_sa_card o_sa_span_4">
+                    <div class="o_sa_card_header">
+                        <h5>Collection Summary</h5>
+                    </div>
+                    <div class="o_sa_recap">
+                        <div class="o_sa_recap_row">
+                            <span class="o_sa_recap_label">Total Billed</span>
+                            <span class="o_sa_recap_value" t-esc="fmtCompactMoney(state.data.kpi.invoiced)"/>
+                        </div>
+                        <div class="o_sa_recap_row">
+                            <span class="o_sa_recap_label o_sa_dot_green">Total Received</span>
+                            <span class="o_sa_recap_value text-success" t-esc="fmtCompactMoney(state.data.kpi.collected)"/>
+                        </div>
+                        <div class="o_sa_recap_row">
+                            <span class="o_sa_recap_label o_sa_dot_amber">Outstanding</span>
+                            <span class="o_sa_recap_value text-danger" t-esc="fmtCompactMoney(state.data.kpi.outstanding)"/>
+                        </div>
+                        <div class="o_sa_recap_row">
+                            <span class="o_sa_recap_label o_sa_dot_red">Overdue</span>
+                            <span class="o_sa_recap_value text-danger" t-esc="fmtCompactMoney(state.data.kpi.overdue_amount)"/>
+                        </div>
+                        <div class="o_sa_recap_total">
+                            <span>Collection Rate</span>
+                            <strong><t t-esc="state.data.kpi.collection_rate"/>%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </t>
+
+            <!-- Custom widgets -->
+            <t t-if="section.id === 'custom'">
+            <t t-if="state.data.custom_widgets and state.data.custom_widgets.length">
+            <div class="o_sa_section_title">Custom Widgets</div>
+            <div class="o_sa_chart_grid">
+                <t t-foreach="state.data.custom_widgets" t-as="w" t-key="w.id">
+                    <div class="o_sa_card o_sa_span_4">
+                        <div class="o_sa_card_header">
+                            <h5 t-esc="w.title"/>
+                            <small class="text-muted" t-esc="w.measure_label"/>
+                        </div>
+                        <div class="o_sa_chart_box">
+                            <canvas t-att-data-widget="w.id"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+            </t>
+            </t>
+
+            <!-- Receivables breakdown — where applicable -->
+            <t t-if="section.id === 'recv_breakdown'">
+            <div class="o_sa_chart_grid o_sa_two_col"
+                 t-if="state.data.receivables_breakdown.project.length or state.data.receivables_breakdown.block.length or state.data.receivables_breakdown.sector.length or state.data.receivables_breakdown.floor.length">
+                <t t-set="dims" t-value="[
+                    ['project', 'Receivables by Project', 'Project'],
+                    ['sector', 'Receivables by Sector', 'Sector / City'],
+                    ['block', 'Receivables by Block', 'Block'],
+                    ['floor', 'Receivables by Floor', 'Floor']
+                ]"/>
+                <t t-foreach="dims" t-as="dim" t-key="dim[0]">
+                    <div class="o_sa_card" t-if="state.data.receivables_breakdown[dim[0]].length">
+                        <div class="o_sa_card_header">
+                            <h5 t-esc="dim[1]"/>
+                            <small class="text-muted">Billed · Received · Outstanding</small>
+                        </div>
+                        <table class="table table-sm table-hover o_sa_table">
+                            <thead>
+                                <tr>
+                                    <th t-esc="dim[2]"/>
+                                    <th class="text-end">Units</th>
+                                    <th class="text-end">Received</th>
+                                    <th class="text-end">Outstanding</th>
+                                    <th style="min-width: 120px;">Collected</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="state.data.receivables_breakdown[dim[0]]" t-as="r" t-key="r.key">
+                                    <td><strong t-esc="r.label"/></td>
+                                    <td class="text-end" t-esc="fmtInt(r.count)"/>
+                                    <td class="text-end text-success" t-esc="fmtCompactMoney(r.received)"/>
+                                    <td class="text-end text-danger" t-esc="fmtCompactMoney(r.outstanding)"/>
+                                    <td>
+                                        <div class="o_sa_progress">
+                                            <div class="o_sa_progress_bar o_sa_progress_bar_green"
+                                                 t-attf-style="width: {{ r.collection_rate }}%;"/>
+                                            <span class="o_sa_progress_label"><t t-esc="r.collection_rate"/>%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </div>
+            </t>
+
+            <!-- Section: Project Inventory Detail -->
+            <t t-if="section.id === 'project_detail'">
+            <div class="o_sa_section_title">Project Inventory Detail</div>
+            <div class="o_sa_card">
+                <table class="table table-hover o_sa_table">
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Available</th>
+                            <th class="text-end">Reserved</th>
+                            <th class="text-end">Booked</th>
+                            <th class="text-end">Sold</th>
+                            <th class="text-end">Blocked</th>
+                            <th style="min-width: 160px;">Sell-Through</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="state.data.project_inventory" t-as="p" t-key="p.id"
+                            class="o_sa_clickable" t-on-click="() =&gt; this.openProjectProperties(p.id)">
+                            <td>
+                                <strong t-esc="p.name"/>
+                                <div class="text-muted small" t-esc="p.code"/>
+                            </td>
+                            <td class="text-end" t-esc="fmtInt(p.total)"/>
+                            <td class="text-end text-success" t-esc="fmtInt(p.available)"/>
+                            <td class="text-end text-warning" t-esc="fmtInt(p.reserved)"/>
+                            <td class="text-end text-primary" t-esc="fmtInt(p.booked)"/>
+                            <td class="text-end" style="color:#6366F1;" t-esc="fmtInt(p.sold)"/>
+                            <td class="text-end text-danger" t-esc="fmtInt(p.blocked)"/>
+                            <td>
+                                <div class="o_sa_progress">
+                                    <div class="o_sa_progress_bar"
+                                         t-attf-style="width: {{ p.sell_through }}%;"/>
+                                    <span class="o_sa_progress_label"><t t-esc="p.sell_through"/>%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr t-if="!state.data.project_inventory.length">
+                            <td colspan="8" class="text-center text-muted py-4">No projects yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </t>
+
+            <!-- Section: Lists (Upcoming + Top Dealers) -->
+            <t t-if="section.id === 'lists'">
+            <div class="o_sa_chart_grid o_sa_two_col">
+                <div class="o_sa_card">
+                    <div class="o_sa_card_header">
+                        <h5>Upcoming Installments (Next 30 Days)</h5>
+                    </div>
+                    <table class="table table-sm table-hover o_sa_table">
+                        <thead>
+                            <tr>
+                                <th>Due</th>
+                                <th>Booking</th>
+                                <th>Customer</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="state.data.upcoming_installments" t-as="i" t-key="i.id"
+                                class="o_sa_clickable" t-on-click="() =&gt; this.openOneInstallment(i.id)">
+                                <td>
+                                    <div><t t-esc="i.due_date"/></div>
+                                    <small class="text-muted">
+                                        <t t-if="i.days_to_due == 0">today</t>
+                                        <t t-elif="i.days_to_due == 1">in 1 day</t>
+                                        <t t-else="">in <t t-esc="i.days_to_due"/> days</t>
+                                    </small>
+                                </td>
+                                <td>
+                                    <strong t-esc="i.booking"/>
+                                    <div class="text-muted small" t-esc="i.property"/>
+                                </td>
+                                <td t-esc="i.customer"/>
+                                <td class="text-end" t-esc="fmtCompactMoney(i.amount)"/>
+                            </tr>
+                            <tr t-if="!state.data.upcoming_installments.length">
+                                <td colspan="4" class="text-center text-muted py-4">No installments due in the next 30 days.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="o_sa_card">
+                    <div class="o_sa_card_header">
+                        <h5>Top Dealers by Sales</h5>
+                    </div>
+                    <table class="table table-sm table-hover o_sa_table">
+                        <thead>
+                            <tr>
+                                <th>Dealer</th>
+                                <th class="text-end">Bookings</th>
+                                <th class="text-end">Sales</th>
+                                <th class="text-end">Commission</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="state.data.top_dealers" t-as="d" t-key="d.id">
+                                <td><strong t-esc="d.name"/></td>
+                                <td class="text-end" t-esc="fmtInt(d.bookings)"/>
+                                <td class="text-end" t-esc="fmtCompactMoney(d.sales)"/>
+                                <td class="text-end" t-esc="fmtCompactMoney(d.commission)"/>
+                            </tr>
+                            <tr t-if="!state.data.top_dealers.length">
+                                <td colspan="4" class="text-center text-muted py-4">No dealers yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </t>
+
+            <!-- Section: Recent Bookings -->
+            <t t-if="section.id === 'recent_bookings'">
+            <div class="o_sa_card">
+                <div class="o_sa_card_header">
+                    <h5>Recent Bookings</h5>
+                </div>
+                <table class="table table-hover o_sa_table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Property</th>
+                            <th>Project</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Collected</th>
+                            <th class="text-end">Outstanding</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="state.data.recent_bookings" t-as="b" t-key="b.id"
+                            class="o_sa_clickable" t-on-click="() =&gt; this.openOneBooking(b.id)">
+                            <td><strong t-esc="b.name"/></td>
+                            <td t-esc="b.date"/>
+                            <td t-esc="b.customer"/>
+                            <td t-esc="b.property"/>
+                            <td t-esc="b.project"/>
+                            <td class="text-end" t-esc="fmtCompactMoney(b.amount)"/>
+                            <td class="text-end text-success" t-esc="fmtCompactMoney(b.collected)"/>
+                            <td class="text-end text-danger" t-esc="fmtCompactMoney(b.outstanding)"/>
+                            <td>
+                                <span class="o_sa_pill" t-attf-style="background: {{ b.state_color }}1F; color: {{ b.state_color }}; border: 1px solid {{ b.state_color }}55;">
+                                    <t t-esc="b.state_label"/>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr t-if="!state.data.recent_bookings.length">
+                            <td colspan="9" class="text-center text-muted py-4">No bookings yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </t>
+
+            <!-- Section: Transfers -->
+            <t t-if="section.id === 'transfers'">
+            <div class="o_sa_section_title">Property Transfers</div>
+            <div class="o_sa_card">
+                <div class="o_sa_card_header">
+                    <h5>Recent Transfers</h5>
+                    <small class="text-muted">Click a row to open the transfer</small>
+                </div>
+                <table class="table table-hover o_sa_table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Date</th>
+                            <th>Property</th>
+                            <th>Seller</th>
+                            <th>Buyer</th>
+                            <th class="text-end">Sale Price</th>
+                            <th class="text-end">Buyer Total</th>
+                            <th class="text-end">Net to Seller</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="state.data.transfers_list" t-as="t" t-key="t.id"
+                            class="o_sa_clickable" t-on-click="() =&gt; this.openOneTransfer(t.id)">
+                            <td><strong t-esc="t.name"/></td>
+                            <td t-esc="t.date"/>
+                            <td>
+                                <span t-esc="t.property"/>
+                                <div class="text-muted small" t-esc="t.project"/>
+                            </td>
+                            <td t-esc="t.from_partner"/>
+                            <td t-esc="t.to_partner"/>
+                            <td class="text-end" t-esc="fmtCompactMoney(t.sale_price)"/>
+                            <td class="text-end" t-esc="fmtCompactMoney(t.total_buyer)"/>
+                            <td class="text-end" t-esc="fmtCompactMoney(t.net_to_seller)"/>
+                            <td>
+                                <span class="o_sa_pill" t-attf-style="background: {{ t.state_color }}1F; color: {{ t.state_color }}; border: 1px solid {{ t.state_color }}55;">
+                                    <t t-esc="t.state_label"/>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr t-if="!state.data.transfers_list.length">
+                            <td colspan="9" class="text-center text-muted py-4">No transfers yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </t>
+
+            </t><!-- /section.visible -->
+            </t><!-- /orderedSections -->
+
+        </t>
+    </div>
+</t>
+
+</templates>

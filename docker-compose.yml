@@ -89,6 +89,7 @@ services:
       - odoo_data:/var/lib/odoo
       - ./odoo/config:/etc/odoo
       - ./addons:/mnt/extra-addons
+      - ./personal_addons:/mnt/personal-addons
     restart: unless-stopped
     # No direct internet — internal only; egress via proxy service
     networks:

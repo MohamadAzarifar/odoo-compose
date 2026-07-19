@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_installment_payment_wizard_form" model="ir.ui.view">
+        <field name="name">sa.installment.payment.wizard.form</field>
+        <field name="model">sa.installment.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Register Installment Payments">
+                <group>
+                    <field name="payment_date"/>
+                    <field name="journal_id" options="{'no_create': True}"/>
+                    <field name="communication"/>
+                </group>
+                <field name="installment_ids">
+                    <list create="false" delete="false" edit="false">
+                        <field name="display_name"/>
+                        <field name="due_date"/>
+                        <field name="amount" sum="Total"/>
+                        <field name="state"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_register" type="object"
+                            string="Register Payments" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sa_installment_payment_wizard" model="ir.actions.act_window">
+        <field name="name">Register Payment</field>
+        <field name="res_model">sa.installment.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_sa_property_installment"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

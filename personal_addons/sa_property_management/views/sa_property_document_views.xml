@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_document_list" model="ir.ui.view">
+        <field name="name">sa.property.document.list</field>
+        <field name="model">sa.property.document</field>
+        <field name="arch" type="xml">
+            <list string="Documents" default_order="issue_date desc">
+                <field name="name"/>
+                <field name="document_type"/>
+                <field name="property_id"/>
+                <field name="booking_id" optional="show"/>
+                <field name="partner_id" optional="show"/>
+                <field name="reference" optional="hide"/>
+                <field name="issue_date" optional="show"/>
+                <field name="expiry_date" optional="show"/>
+                <field name="responsible_id" optional="hide"/>
+                <field name="attachment_count" string="Files" optional="show"/>
+                <field name="is_expired" column_invisible="1"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'issued'"
+                       decoration-info="state in ('requested', 'in_progress')"
+                       decoration-danger="state == 'expired'"
+                       decoration-muted="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_document_form" model="ir.ui.view">
+        <field name="name">sa.property.document.form</field>
+        <field name="model">sa.property.document</field>
+        <field name="arch" type="xml">
+            <form string="Property Document">
+                <header>
+                    <button name="action_request" type="object"
+                            string="Request" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start" type="object"
+                            string="Start Processing"
+                            invisible="state not in ('draft', 'requested')"/>
+                    <button name="action_mark_issued" type="object"
+                            string="Mark Issued" class="btn-primary"
+                            invisible="state in ('issued', 'cancelled')"/>
+                    <button name="action_mark_expired" type="object"
+                            string="Mark Expired"
+                            invisible="state != 'issued'"/>
+                    <button name="action_reset_draft" type="object"
+                            string="Reset to Draft"
+                            invisible="state == 'draft'"/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel"
+                            invisible="state == 'cancelled'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,requested,in_progress,issued"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Expired" bg_color="text-bg-danger"
+                            invisible="not is_expired"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="document_type"/>
+                            <field name="property_id"/>
+                            <field name="booking_id"/>
+                            <field name="transfer_id"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="reference"/>
+                            <field name="issue_date"/>
+                            <field name="expiry_date"/>
+                            <field name="responsible_id"/>
+                            <field name="is_expired" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Files" name="files">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Internal notes about this document..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_property_document_search" model="ir.ui.view">
+        <field name="name">sa.property.document.search</field>
+        <field name="model">sa.property.document</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="booking_id"/>
+                <field name="transfer_id"/>
+                <field name="partner_id"/>
+                <field name="reference"/>
+                <filter name="issued" string="Issued"
+                        domain="[('state', '=', 'issued')]"/>
+                <filter name="pending" string="Pending"
+                        domain="[('state', 'in', ('draft', 'requested', 'in_progress'))]"/>
+                <filter name="expired" string="Expired"
+                        domain="[('expiry_date', '!=', False), ('expiry_date', '&lt;', context_today().strftime('%Y-%m-%d')), ('state', '!=', 'cancelled')]"/>
+                <separator/>
+                <filter name="my_docs" string="My Documents"
+                        domain="[('responsible_id', '=', uid)]"/>
+                <group>
+                    <filter name="group_type" string="Document Type"
+                            context="{'group_by': 'document_type'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_property" string="Property"
+                            context="{'group_by': 'property_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_property_document" model="ir.actions.act_window">
+        <field name="name">Property Documents</field>
+        <field name="res_model">sa.property.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sa_property_document_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Track your first property document
+            </p>
+            <p>
+                Manage allotment letters, possession certificates, NOC/NDC
+                clearances, utility connections, registry and transfer deeds
+                for each unit — with issue/expiry dates and file attachments.
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_sa_property" model="ir.sequence">
+            <field name="name">Property Reference</field>
+            <field name="code">sa.property</field>
+            <field name="prefix">PROP-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_property_dealer" model="ir.sequence">
+            <field name="name">Dealer Code</field>
+            <field name="code">sa.property.dealer</field>
+            <field name="prefix">DLR-</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_property_booking" model="ir.sequence">
+            <field name="name">Property Booking</field>
+            <field name="code">sa.property.booking</field>
+            <field name="prefix">BKG-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_property_transfer" model="ir.sequence">
+            <field name="name">Property Transfer</field>
+            <field name="code">sa.property.transfer</field>
+            <field name="prefix">TRF-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_biometric_verification" model="ir.sequence">
+            <field name="name">Biometric Verification</field>
+            <field name="code">sa.biometric.verification</field>
+            <field name="prefix">BIO-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_service_assignment" model="ir.sequence">
+            <field name="name">Property Service Assignment</field>
+            <field name="code">sa.property.service.assignment</field>
+            <field name="prefix">SVC-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_dealer_allocation" model="ir.sequence">
+            <field name="name">Dealer Allocation</field>
+            <field name="code">sa.dealer.allocation</field>
+            <field name="prefix">ALLOC-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_commission" model="ir.sequence">
+            <field name="name">Property Commission</field>
+            <field name="code">sa.commission</field>
+            <field name="prefix">COMM-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_property_deal" model="ir.sequence">
+            <field name="name">Investor Deal</field>
+            <field name="code">sa.property.deal</field>
+            <field name="prefix">DEAL-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_property_document" model="ir.sequence">
+            <field name="name">Property Document</field>
+            <field name="code">sa.property.document</field>
+            <field name="prefix">DOC-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_construction_project" model="ir.sequence">
+            <field name="name">Construction Project</field>
+            <field name="code">sa.construction.project</field>
+            <field name="prefix">CON-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_construction_contract" model="ir.sequence">
+            <field name="name">Construction Subcontract</field>
+            <field name="code">sa.construction.contract</field>
+            <field name="prefix">WO-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_construction_ipc" model="ir.sequence">
+            <field name="name">Interim Payment Certificate</field>
+            <field name="code">sa.construction.ipc</field>
+            <field name="prefix">IPC-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_construction_requisition" model="ir.sequence">
+            <field name="name">Material Requisition</field>
+            <field name="code">sa.construction.requisition</field>
+            <field name="prefix">MR-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sa_construction_material_issue" model="ir.sequence">
+            <field name="name">Material Issue</field>
+            <field name="code">sa.construction.material.issue</field>
+            <field name="prefix">MI-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Daily cron to refresh overdue status -->
+        <record id="cron_sa_installment_overdue" model="ir.cron">
+            <field name="name">SA Property: Refresh Installment Overdue Status</field>
+            <field name="model_id" ref="model_sa_property_installment"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_update_overdue()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Daily cron to auto-generate recurring service bills -->
+        <record id="cron_sa_service_billing" model="ir.cron">
+            <field name="name">SA Property: Auto-Generate Service Bills</field>
+            <field name="model_id" ref="model_sa_property_service_assignment"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_generate_service_bills()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

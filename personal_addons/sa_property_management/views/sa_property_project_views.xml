@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_project_tree" model="ir.ui.view">
+        <field name="name">sa.property.project.tree</field>
+        <field name="model">sa.property.project</field>
+        <field name="arch" type="xml">
+            <list string="Projects">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="total_area" sum="Total Area"/>
+                <field name="area_uom"/>
+                <field name="consumed_area" sum="Allocated" optional="show"/>
+                <field name="remaining_area" sum="Remaining" optional="show"/>
+                <field name="property_count" sum="Properties"/>
+                <field name="available_count" sum="Available"/>
+                <field name="sold_count" sum="Sold"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_project_kanban" model="ir.ui.view">
+        <field name="name">sa.property.project.kanban</field>
+        <field name="model">sa.property.project</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city"/>
+                <field name="image"/>
+                <field name="property_count"/>
+                <field name="available_count"/>
+                <field name="sold_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div t-if="record.image.raw_value" class="o_kanban_image">
+                                <img t-att-src="'/web/image/sa.property.project/' + record.id.raw_value + '/image'"
+                                     t-att-alt="record.name.value" style="width:100%;height:120px;object-fit:cover;border-radius:4px;"/>
+                            </div>
+                            <div class="o_kanban_details">
+                                <strong><field name="name"/></strong>
+                                <div class="text-muted"><field name="code"/> · <field name="city"/></div>
+                                <div class="o_kanban_tags_section mt8">
+                                    <span class="badge text-bg-info">Total: <field name="property_count"/></span>
+                                    <span class="badge text-bg-success">Available: <field name="available_count"/></span>
+                                    <span class="badge text-bg-warning">Sold: <field name="sold_count"/></span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_sa_property_project_form" model="ir.ui.view">
+        <field name="name">sa.property.project.form</field>
+        <field name="model">sa.property.project</field>
+        <field name="arch" type="xml">
+            <form string="Project">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
+                            invisible="active"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_properties" type="object"
+                                class="oe_stat_button" icon="fa-home">
+                            <field name="property_count" widget="statinfo"
+                                   string="Properties"/>
+                        </button>
+                        <button name="action_view_properties" type="object"
+                                class="oe_stat_button" icon="fa-check-circle">
+                            <field name="available_count" widget="statinfo"
+                                   string="Available"/>
+                        </button>
+                        <button name="action_view_properties" type="object"
+                                class="oe_stat_button" icon="fa-money">
+                            <field name="sold_count" widget="statinfo"
+                                   string="Sold"/>
+                        </button>
+                    </div>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Project name"/></h1>
+                        <field name="code" placeholder="Code"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="city"/>
+                            <field name="state_id" options="{'no_create': True}"/>
+                            <field name="country_id" options="{'no_create': True}"/>
+                            <field name="address"/>
+                        </group>
+                        <group>
+                            <field name="total_area"/>
+                            <field name="area_uom"/>
+                            <field name="consumed_area"/>
+                            <field name="remaining_area"/>
+                            <field name="enforce_area_limit"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" options="{'no_create': True}"
+                                   groups="base.group_multi_currency"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Properties">
+                            <field name="property_ids" readonly="1">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="property_type"/>
+                                    <field name="area"/>
+                                    <field name="area_uom"/>
+                                    <field name="base_price"/>
+                                    <field name="state" decoration-success="state == 'available'"
+                                           decoration-warning="state == 'reserved'"
+                                           decoration-info="state in ('booked', 'sold')"
+                                           decoration-muted="state == 'transferred'" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Dealers">
+                            <field name="dealer_ids"/>
+                        </page>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                        <page string="Gallery">
+                            <field name="image_ids" mode="kanban">
+                                <kanban>
+                                    <templates>
+                                        <t t-name="card">
+                                            <field name="image" widget="image" class="w-100"/>
+                                            <div class="px-2 py-1">
+                                                <field name="name" placeholder="Title"/>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                                <form>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="sequence"/>
+                                        <field name="image" widget="image"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Marketing Collateral">
+                            <field name="collateral_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="collateral_type"/>
+                                    <field name="file" filename="file_name"/>
+                                    <field name="file_name" column_invisible="1"/>
+                                    <field name="url" widget="url"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sa_property_project" model="ir.actions.act_window">
+        <field name="name">Projects</field>
+        <field name="res_model">sa.property.project</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+</odoo>

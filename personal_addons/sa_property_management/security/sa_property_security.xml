@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Category -->
+        <record id="module_category_sa_property" model="ir.module.category">
+            <field name="name">Property Management</field>
+            <field name="description">Manage real-estate properties, bookings,
+                payment plans, dealerships and property transfers.</field>
+            <field name="sequence">25</field>
+        </record>
+
+        <!-- Groups -->
+        <record id="group_sa_property_agent" model="res.groups">
+            <field name="name">Sales Agent</field>
+            <field name="implied_ids"
+                   eval="[(4, ref('base.group_user')),
+                          (4, ref('sales_team.group_sale_salesman'))]"/>
+            <field name="comment">Front-line sales agent: capture leads and draft
+                bookings for their own pipeline, with read-only access to the
+                property catalogue and configuration.</field>
+        </record>
+
+        <record id="group_sa_property_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="implied_ids"
+                   eval="[(4, ref('group_sa_property_agent'))]"/>
+            <field name="comment">Property Management user: can view and operate on
+                properties, bookings and receivables assigned to them.</field>
+        </record>
+
+        <record id="group_sa_property_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="implied_ids"
+                   eval="[(4, ref('group_sa_property_user')),
+                          (4, ref('account.group_account_invoice'))]"/>
+            <field name="comment">Full access to property management: configuration,
+                approvals, transfers, financial integration.</field>
+        </record>
+
+        <!-- Construction groups -->
+        <record id="group_sa_construction_user" model="res.groups">
+            <field name="name">Construction User</field>
+            <field name="implied_ids"
+                   eval="[(4, ref('base.group_user')),
+                          (4, ref('project.group_project_user')),
+                          (4, ref('stock.group_stock_user')),
+                          (4, ref('stock.group_stock_multi_locations'))]"/>
+            <field name="comment">Site/construction staff: plan construction projects,
+                phases, subcontracts, material requisitions and issues, and prepare
+                interim payment certificates.</field>
+        </record>
+
+        <record id="group_sa_construction_manager" model="res.groups">
+            <field name="name">Construction Manager</field>
+            <field name="implied_ids"
+                   eval="[(4, ref('group_sa_construction_user')),
+                          (4, ref('project.group_project_manager')),
+                          (4, ref('purchase.group_purchase_user')),
+                          (4, ref('account.group_account_invoice'))]"/>
+            <field name="comment">Full construction control: confirm subcontracts,
+                approve certificates and post vendor bills, launch procurement and
+                manage construction budgets.</field>
+        </record>
+
+        <!-- Record Rules -->
+        <record id="rule_sa_property_agent_company" model="ir.rule">
+            <field name="name">Property: multi-company (agent)</field>
+            <field name="model_id" ref="model_sa_property"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_agent'))]"/>
+        </record>
+
+        <record id="rule_sa_property_user_company" model="ir.rule">
+            <field name="name">Property: multi-company</field>
+            <field name="model_id" ref="model_sa_property"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_user'))]"/>
+        </record>
+
+        <record id="rule_sa_booking_agent_own" model="ir.rule">
+            <field name="name">Booking: own records (agent)</field>
+            <field name="model_id" ref="model_sa_property_booking"/>
+            <field name="domain_force">['&amp;', ('company_id', 'in', company_ids), ('salesperson_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_agent'))]"/>
+        </record>
+
+        <record id="rule_sa_booking_user_company" model="ir.rule">
+            <field name="name">Booking: multi-company</field>
+            <field name="model_id" ref="model_sa_property_booking"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_user'))]"/>
+        </record>
+
+        <record id="rule_sa_installment_agent_own" model="ir.rule">
+            <field name="name">Installment: own records (agent)</field>
+            <field name="model_id" ref="model_sa_property_installment"/>
+            <field name="domain_force">[('booking_id.salesperson_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_agent'))]"/>
+        </record>
+
+        <record id="rule_sa_transfer_user_company" model="ir.rule">
+            <field name="name">Transfer: multi-company</field>
+            <field name="model_id" ref="model_sa_property_transfer"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_user'))]"/>
+        </record>
+
+        <record id="rule_sa_document_agent_own" model="ir.rule">
+            <field name="name">Document: own records (agent)</field>
+            <field name="model_id" ref="model_sa_property_document"/>
+            <field name="domain_force">['&amp;', ('company_id', 'in', company_ids), '|', ('booking_id.salesperson_id', '=', user.id), ('responsible_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_agent'))]"/>
+        </record>
+
+        <record id="rule_sa_document_user_company" model="ir.rule">
+            <field name="name">Document: multi-company</field>
+            <field name="model_id" ref="model_sa_property_document"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_sa_property_user'))]"/>
+        </record>
+
+    </data>
+</odoo>

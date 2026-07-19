@@ -218,7 +218,7 @@ main() {
   bootstrap_env
   render_odoo_conf
 
-  mkdir -p addons certbot/www certbot/conf nginx/conf.d odoo/config
+  mkdir -p addons personal_addons certbot/www certbot/conf nginx/conf.d odoo/config proxy
 
   log "Pulling images..."
   compose pull

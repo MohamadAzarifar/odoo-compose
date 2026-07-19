@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_sa_property" model="ir.ui.view">
+        <field name="name">res.partner.form.sa.property</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_biometric_verifications"
+                        type="object" class="oe_stat_button"
+                        icon="fa-id-card"
+                        invisible="sa_biometric_verification_count == 0">
+                    <field name="sa_biometric_verification_count"
+                           widget="statinfo" string="Verifications"/>
+                </button>
+            </div>
+            <notebook position="inside">
+                <page string="Property / KYC" name="sa_property_kyc">
+                    <group>
+                        <group string="Identity">
+                            <field name="sa_cnic"/>
+                            <field name="sa_ntn"/>
+                            <field name="sa_passport_no"/>
+                            <field name="sa_father_husband_name"/>
+                            <field name="sa_dob"/>
+                            <field name="sa_gender"/>
+                            <field name="sa_nationality"/>
+                            <field name="sa_occupation"/>
+                        </group>
+                        <group string="Property Roles">
+                            <field name="sa_is_property_customer"/>
+                            <field name="sa_is_property_dealer"/>
+                            <field name="sa_biometric_verified"/>
+                        </group>
+                    </group>
+                    <group string="Next of Kin">
+                        <group>
+                            <field name="sa_nok_name"/>
+                            <field name="sa_nok_relation"/>
+                            <field name="sa_nok_cnic"/>
+                        </group>
+                        <group>
+                            <field name="sa_nok_mobile"/>
+                            <field name="sa_nok_phone"/>
+                            <field name="sa_nok_address"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+</odoo>

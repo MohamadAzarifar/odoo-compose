@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_transfer_tax_tree" model="ir.ui.view">
+        <field name="name">sa.transfer.tax.tree</field>
+        <field name="model">sa.transfer.tax</field>
+        <field name="arch" type="xml">
+            <list string="Transfer Taxes">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="country_id" optional="show"/>
+                <field name="computation"/>
+                <field name="rate"/>
+                <field name="fixed_amount" optional="hide"/>
+                <field name="payer"/>
+                <field name="property_type_filter"/>
+                <field name="account_id"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_transfer_tax_form" model="ir.ui.view">
+        <field name="name">sa.transfer.tax.form</field>
+        <field name="model">sa.transfer.tax</field>
+        <field name="arch" type="xml">
+            <form string="Transfer Tax">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
+                            invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="country_id"/>
+                            <field name="sequence"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="computation"/>
+                            <field name="rate" invisible="computation == 'fixed'"
+                                   required="computation != 'fixed'"/>
+                            <field name="fixed_amount" invisible="computation != 'fixed'"
+                                   required="computation == 'fixed'"/>
+                            <field name="payer"/>
+                            <field name="property_type_filter"/>
+                            <field name="account_id"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sa_transfer_tax" model="ir.actions.act_window">
+        <field name="name">Transfer Taxes</field>
+        <field name="res_model">sa.transfer.tax</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Configure property transfer taxes</p>
+            <p>Define transfer/stamp duty, registration, capital gains, VAT/GST
+               and withholding taxes per country, with their computation method
+               and the payer. Taxes for your operating country are applied
+               automatically on transfers.</p>
+        </field>
+    </record>
+
+</odoo>

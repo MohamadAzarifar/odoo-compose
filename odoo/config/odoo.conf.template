@@ -1,5 +1,6 @@
 [options]
-addons_path = /mnt/extra-addons
+# Core → personal (overrides) → third-party/shared under ./addons
+addons_path = /usr/lib/python3/dist-packages/odoo/addons,/mnt/personal-addons,/mnt/extra-addons
 data_dir = /var/lib/odoo
 
 db_host = db

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- The module uses a Selection field for area units (marla/kanal/sqft/...).
+             This file is reserved for future expansion (e.g. seeding a
+             res.currency for PKR or an ir.config_parameter default).
+             Currency PKR is part of standard Odoo data; we only ensure it
+             is active for the current company on first install. -->
+
+        <function model="res.currency" name="action_unarchive">
+            <value model="res.currency" search="[('name', '=', 'PKR')]"/>
+        </function>
+
+    </data>
+</odoo>

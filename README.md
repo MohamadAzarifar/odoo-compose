@@ -39,7 +39,8 @@ Data persists in Docker volumes `odoo_db_data` and `odoo_data`.
 ├── start.sh                 # One-click bootstrap + start
 ├── docker-compose.yml
 ├── .env.example
-├── addons/                  # Custom Odoo addons (bind-mounted)
+├── addons/                  # Third-party / shared Odoo addons
+├── personal_addons/         # Your custom personal modules
 ├── odoo/config/
 │   └── odoo.conf.template   # Rendered to odoo.conf on start
 ├── proxy/
@@ -106,10 +107,19 @@ docker-compose down          # stop containers (keeps volumes)
 docker-compose up -d         # start again
 ```
 
-Custom addons: place them under `addons/` and restart Odoo:
+### Addons
+
+| Host path | Container path | Use for |
+|-----------|----------------|---------|
+| `addons/` | `/mnt/extra-addons` | Third-party / shared modules (themes, OCA, …) |
+| `personal_addons/` | `/mnt/personal-addons` | Your own custom modules |
+
+`personal_addons` is first in `addons_path` (after Odoo core), so personal modules can override same-named modules in `addons/`.
 
 ```bash
+# After adding modules:
 docker-compose restart odoo
+# Then in Odoo UI: Apps → Update Apps List
 ```
 
 ## Troubleshooting

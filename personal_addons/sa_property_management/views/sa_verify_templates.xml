@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="sa_verify_page" name="SA Document Verification">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <div class="container my-5" style="max-width: 640px;">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <img t-if="company and company.logo"
+                                 t-att-src="image_data_uri(company.logo)"
+                                 style="max-height: 64px;" alt="Logo"/>
+                            <h3 class="mt-3 mb-0" t-esc="company.name if company else ''"/>
+                            <div class="text-muted small">Document Verification</div>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <t t-if="info['valid']">
+                                <span class="badge rounded-pill text-bg-success px-3 py-2"
+                                      style="font-size: 1rem;">
+                                    <i class="fa fa-check-circle me-1"/> Verified
+                                </span>
+                            </t>
+                            <t t-else="">
+                                <span class="badge rounded-pill text-bg-warning px-3 py-2"
+                                      style="font-size: 1rem;">
+                                    <i class="fa fa-exclamation-triangle me-1"/>
+                                    <t t-esc="info['status_label']"/>
+                                </span>
+                            </t>
+                        </div>
+
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Document Type</th>
+                                    <td><strong t-esc="info['doc_type']"/></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Reference</th>
+                                    <td><strong t-esc="info['reference']"/></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Status</th>
+                                    <td t-esc="info['status_label']"/>
+                                </tr>
+                                <t t-foreach="info['rows']" t-as="row">
+                                    <tr>
+                                        <th class="text-muted" t-esc="row[0]"/>
+                                        <td t-esc="row[1]"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <p class="text-center text-muted small mb-0 mt-3">
+                            This page confirms the authenticity of the scanned document.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="sa_verify_not_found" name="SA Document Not Found">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <div class="container my-5 text-center" style="max-width: 560px;">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-5">
+                        <i class="fa fa-times-circle text-danger" style="font-size: 3rem;"/>
+                        <h4 class="mt-3">Document Not Found</h4>
+                        <p class="text-muted">
+                            The scanned code does not match any document in our records,
+                            or the document may have been removed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

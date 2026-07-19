@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!--
+        Fingerprint field: the standard image control plus an optional
+        "Scan with SecuGen" button. The button only appears when a device is
+        configured; otherwise the operator simply uploads an image, so a
+        missing device never blocks the verification (or the transaction).
+    -->
+    <t t-name="sa_property_management.SaFingerprintField">
+        <div class="o_sa_fingerprint_field">
+            <t t-call="web.ImageField"/>
+            <div class="o_sa_fingerprint_actions mt-2"
+                 t-if="!props.readonly and captureState.available">
+                <button type="button"
+                        class="btn btn-secondary btn-sm"
+                        t-att-disabled="captureState.scanning"
+                        t-on-click="onScanFingerprint">
+                    <i class="fa me-1"
+                       t-att-class="captureState.scanning ? 'fa-spinner fa-spin' : 'fa-fingerprint'"/>
+                    <t t-if="captureState.scanning">Scanning…</t>
+                    <t t-else="">Scan with SecuGen</t>
+                </button>
+            </div>
+        </div>
+    </t>
+
+</templates>

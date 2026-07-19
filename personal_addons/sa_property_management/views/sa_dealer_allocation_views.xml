@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_dealer_allocation_list" model="ir.ui.view">
+        <field name="name">sa.dealer.allocation.list</field>
+        <field name="model">sa.dealer.allocation</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state in ('returned', 'cancelled')">
+                <field name="name"/>
+                <field name="dealer_id"/>
+                <field name="project_id"/>
+                <field name="allocation_date"/>
+                <field name="expiry_date"/>
+                <field name="property_count" string="Units"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'allocated'"
+                       decoration-info="state == 'draft'"
+                       decoration-muted="state in ('returned', 'cancelled')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_dealer_allocation_form" model="ir.ui.view">
+        <field name="name">sa.dealer.allocation.form</field>
+        <field name="model">sa.dealer.allocation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_allocate" type="object" string="Allocate"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_return" type="object" string="Mark Returned"
+                            invisible="state != 'allocated'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('cancelled', 'returned')"/>
+                    <button name="action_reset" type="object" string="Reset to Draft"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,allocated,returned"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="dealer_id"/>
+                            <field name="project_id"/>
+                        </group>
+                        <group>
+                            <field name="allocation_date"/>
+                            <field name="expiry_date"/>
+                            <field name="property_count"/>
+                        </group>
+                    </group>
+                    <field name="sa_qr_image" widget="image" class="float-end"
+                           options="{'size': [120, 120]}" readonly="1"/>
+                    <notebook>
+                        <page string="Allocated Units">
+                            <field name="property_ids">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="property_type"/>
+                                    <field name="area"/>
+                                    <field name="area_uom"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sa_dealer_allocation" model="ir.actions.act_window">
+        <field name="name">Dealer Allocations</field>
+        <field name="res_model">sa.dealer.allocation</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Allocate inventory to a dealer</p>
+            <p>Hand a set of property units to a dealer to market and sell, and
+               print a QR-stamped allocation document.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_biometric_verification_list" model="ir.ui.view">
+        <field name="name">sa.biometric.verification.list</field>
+        <field name="model">sa.biometric.verification</field>
+        <field name="arch" type="xml">
+            <list string="Biometric Verifications"
+                  decoration-success="state == 'verified'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-muted="state == 'pending'">
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="method"/>
+                <field name="booking_id" optional="show"/>
+                <field name="transfer_id" optional="hide"/>
+                <field name="device_info" optional="hide"/>
+                <field name="verified_by" optional="show"/>
+                <field name="verified_on" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'verified'"
+                       decoration-danger="state == 'rejected'"
+                       decoration-warning="state == 'pending'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_biometric_verification_form" model="ir.ui.view">
+        <field name="name">sa.biometric.verification.form</field>
+        <field name="model">sa.biometric.verification</field>
+        <field name="arch" type="xml">
+            <form string="Biometric Verification">
+                <header>
+                    <button name="action_verify" type="object"
+                            string="Mark Verified" class="btn-primary"
+                            invisible="state == 'verified'"/>
+                    <button name="action_reject" type="object"
+                            string="Reject"
+                            invisible="state == 'rejected'"/>
+                    <button name="action_reset" type="object"
+                            string="Reset to Pending"
+                            invisible="state == 'pending'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pending,verified"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="customer_id"
+                                   readonly="state != 'pending'"/>
+                            <field name="method"/>
+                            <field name="device_info"/>
+                        </group>
+                        <group>
+                            <field name="booking_id" readonly="1"
+                                   invisible="not booking_id"/>
+                            <field name="transfer_id" readonly="1"
+                                   invisible="not transfer_id"/>
+                            <field name="verified_by" readonly="1"
+                                   invisible="not verified_by"/>
+                            <field name="verified_on" readonly="1"
+                                   invisible="not verified_on"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Captured Biometrics">
+                        <group>
+                            <field name="fingerprint_image" widget="sa_fingerprint"
+                                   class="oe_avatar"/>
+                            <field name="face_photo" widget="image"
+                                   class="oe_avatar"/>
+                        </group>
+                        <group>
+                            <field name="id_document_image" widget="image"
+                                   class="oe_avatar"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="note" nolabel="1" placeholder="Operator notes…"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_biometric_verification_search" model="ir.ui.view">
+        <field name="name">sa.biometric.verification.search</field>
+        <field name="model">sa.biometric.verification</field>
+        <field name="arch" type="xml">
+            <search string="Biometric Verifications">
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="booking_id"/>
+                <field name="transfer_id"/>
+                <filter name="filter_pending" string="Pending"
+                        domain="[('state', '=', 'pending')]"/>
+                <filter name="filter_verified" string="Verified"
+                        domain="[('state', '=', 'verified')]"/>
+                <filter name="filter_rejected" string="Rejected"
+                        domain="[('state', '=', 'rejected')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_customer" string="Customer"
+                            context="{'group_by': 'customer_id'}"/>
+                    <filter name="group_method" string="Method"
+                            context="{'group_by': 'method'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_biometric_verification" model="ir.actions.act_window">
+        <field name="name">Biometric Verifications</field>
+        <field name="res_model">sa.biometric.verification</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sa_biometric_verification_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Capture a customer identity verification
+            </p>
+            <p>
+                Record fingerprint, face photo or ID document scans to verify
+                a customer's identity before confirming bookings or completing
+                transfers.
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_booking_tree" model="ir.ui.view">
+        <field name="name">sa.property.booking.tree</field>
+        <field name="model">sa.property.booking</field>
+        <field name="arch" type="xml">
+            <list string="Bookings" decoration-info="state == 'confirmed'"
+                  decoration-success="state == 'completed'"
+                  decoration-warning="state == 'in_payment'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="booking_date"/>
+                <field name="customer_id"/>
+                <field name="property_id"/>
+                <field name="project_id" optional="show"/>
+                <field name="dealer_id" optional="show"/>
+                <field name="total_price" sum="Total"/>
+                <field name="amount_invoiced" sum="Invoiced"/>
+                <field name="amount_paid" sum="Paid"/>
+                <field name="amount_residual" sum="Residual"/>
+                <field name="state" widget="badge"/>
+                <field name="currency_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_booking_form" model="ir.ui.view">
+        <field name="name">sa.property.booking.form</field>
+        <field name="model">sa.property.booking</field>
+        <field name="arch" type="xml">
+            <form string="Booking">
+                <header>
+                    <button name="%(action_sa_booking_confirm_wizard)d" type="action"
+                            string="Confirm" class="btn-primary"
+                            invisible="state != 'draft'"
+                            context="{'default_booking_id': id}"/>
+                    <button name="action_verify_customer_identity" type="object"
+                            string="Verify Identity"
+                            invisible="state != 'draft' or not customer_id"/>
+                    <button name="action_mark_completed" type="object"
+                            string="Mark Completed"
+                            invisible="state != 'in_payment'"/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel"
+                            invisible="state in ('cancelled', 'completed')"/>
+                    <button name="action_reset_to_draft" type="object"
+                            string="Reset to Draft"
+                            invisible="state != 'cancelled'"/>
+                    <button name="action_print_payment_schedule" type="object"
+                            string="Print Schedule"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,in_payment,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoices" type="object"
+                                class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="invoice_count == 0">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="action_view_installments" type="object"
+                                class="oe_stat_button" icon="fa-calendar"
+                                invisible="installment_count == 0">
+                            <field name="installment_count" widget="statinfo" string="Installments"/>
+                        </button>
+                        <button name="action_view_sale_order" type="object"
+                                class="oe_stat_button" icon="fa-shopping-cart"
+                                invisible="not sale_order_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Sale Order</span>
+                            </div>
+                        </button>
+                        <button name="action_view_commissions" type="object"
+                                class="oe_stat_button" icon="fa-percent"
+                                invisible="commission_count == 0">
+                            <field name="commission_count" widget="statinfo" string="Commissions"/>
+                        </button>
+                        <button name="action_view_crm_lead" type="object"
+                                class="oe_stat_button" icon="fa-bullseye"
+                                invisible="not crm_lead_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Opportunity</span>
+                            </div>
+                        </button>
+                        <button name="action_view_documents" type="object"
+                                class="oe_stat_button" icon="fa-folder-open-o">
+                            <field name="document_count" widget="statinfo" string="Documents"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="customer_id" options="{'no_quick_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="customer_biometric_verified"
+                                   invisible="not customer_id"/>
+                            <field name="project_id" options="{'no_create_edit': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="property_id" options="{'no_create_edit': True}"
+                                   domain="['|', '&amp;', ('state', '=', 'available'), ('project_id', '=', project_id), ('id', '=', property_id)]"
+                                   readonly="state != 'draft'"/>
+                            <field name="dealer_id" options="{'no_create': True}"/>
+                            <field name="salesperson_id"/>
+                            <field name="crm_lead_id" readonly="1"
+                                   invisible="not crm_lead_id"/>
+                        </group>
+                        <group>
+                            <field name="booking_date" readonly="state != 'draft'"/>
+                            <field name="total_price" readonly="state != 'draft'"/>
+                            <field name="currency_id" options="{'no_create': True}"
+                                   readonly="state != 'draft'"
+                                   groups="base.group_multi_currency"/>
+                            <field name="payment_plan_id" options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="payment_term_id" options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="commission_amount" readonly="1"/>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="amount_invoiced" readonly="1"/>
+                            <field name="amount_paid" readonly="1"/>
+                            <field name="amount_residual" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Installment Schedule">
+                            <field name="installment_ids" readonly="1">
+                                <list decoration-success="state == 'paid'"
+                                      decoration-warning="state == 'partial'"
+                                      decoration-danger="state == 'overdue'">
+                                    <field name="sequence"/>
+                                    <field name="name"/>
+                                    <field name="line_type"/>
+                                    <field name="due_date"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="amount_paid" sum="Paid"/>
+                                    <field name="amount_residual" sum="Residual"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <button name="action_register_payment" type="object"
+                                            icon="fa-money" string="Pay"
+                                            invisible="state in ('paid', 'cancelled')"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_property_booking_search" model="ir.ui.view">
+        <field name="name">sa.property.booking.search</field>
+        <field name="model">sa.property.booking</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="property_id"/>
+                <field name="project_id"/>
+                <field name="dealer_id"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="In Payment" name="in_pay" domain="[('state', '=', 'in_payment')]"/>
+                <filter string="Completed" name="done" domain="[('state', '=', 'completed')]"/>
+                <filter string="Cancelled" name="cnl" domain="[('state', '=', 'cancelled')]"/>
+                <group>
+                    <filter string="Project" name="grp_project" context="{'group_by': 'project_id'}"/>
+                    <filter string="Dealer" name="grp_dealer" context="{'group_by': 'dealer_id'}"/>
+                    <filter string="Salesperson" name="grp_sp" context="{'group_by': 'salesperson_id'}"/>
+                    <filter string="State" name="grp_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_property_booking" model="ir.actions.act_window">
+        <field name="name">Bookings</field>
+        <field name="res_model">sa.property.booking</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sa_property_booking_search"/>
+        <field name="context">{'search_default_grp_project': 1}</field>
+    </record>
+
+</odoo>

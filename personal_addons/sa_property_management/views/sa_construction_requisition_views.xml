@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_sa_construction_requisition" model="ir.actions.act_window">
+        <field name="name">Material Requisitions</field>
+        <field name="res_model">sa.construction.requisition</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Request materials for the site</p>
+            <p>Approve requisitions and raise purchase orders to replenish stock.</p>
+        </field>
+    </record>
+
+    <record id="view_sa_construction_requisition_list" model="ir.ui.view">
+        <field name="name">sa.construction.requisition.list</field>
+        <field name="model">sa.construction.requisition</field>
+        <field name="arch" type="xml">
+            <list string="Material Requisitions" decoration-muted="state == 'cancelled'"
+                  decoration-success="state == 'purchased'">
+                <field name="name"/>
+                <field name="construction_id"/>
+                <field name="vendor_id" optional="show"/>
+                <field name="requested_by" optional="hide"/>
+                <field name="date_request"/>
+                <field name="date_required" optional="hide"/>
+                <field name="estimated_cost" sum="Estimated"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'purchased'"
+                       decoration-info="state == 'approved'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_construction_requisition_form" model="ir.ui.view">
+        <field name="name">sa.construction.requisition.form</field>
+        <field name="model">sa.construction.requisition</field>
+        <field name="arch" type="xml">
+            <form string="Material Requisition">
+                <header>
+                    <button name="action_approve" type="object" string="Approve"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_create_rfq" type="object" string="Create Purchase Order"
+                            class="btn-primary" invisible="state not in ('approved', 'purchased')"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('purchased', 'cancelled')"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft"
+                            invisible="state not in ('approved', 'cancelled')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_purchase_orders" type="object"
+                                class="oe_stat_button" icon="fa-shopping-cart"
+                                invisible="po_count == 0">
+                            <field name="po_count" widget="statinfo" string="Purchase Orders"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="construction_id" readonly="state != 'draft'"/>
+                            <field name="vendor_id"/>
+                            <field name="requested_by"/>
+                        </group>
+                        <group>
+                            <field name="date_request"/>
+                            <field name="date_required"/>
+                            <field name="estimated_cost"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items" name="items">
+                            <field name="line_ids" readonly="state not in ('draft', 'approved')">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="uom_id" optional="show"/>
+                                    <field name="quantity"/>
+                                    <field name="estimated_cost" sum="Estimated"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_construction_requisition_search" model="ir.ui.view">
+        <field name="name">sa.construction.requisition.search</field>
+        <field name="model">sa.construction.requisition</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="construction_id"/>
+                <field name="vendor_id"/>
+                <filter name="to_approve" string="To Approve" domain="[('state', '=', 'draft')]"/>
+                <filter name="approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <group>
+                    <filter name="group_construction" string="Construction Project"
+                            context="{'group_by': 'construction_id'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>

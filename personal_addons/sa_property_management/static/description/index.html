@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SA Property Management</title>
+</head>
+<body>
+<!--
+    Self-contained product page for the Odoo Apps store.
+    IMPORTANT — the Odoo Apps description sanitizer STRIPS background / background-color /
+    background-image (gradients) from inline styles, and removes <style> blocks, external
+    CSS, web fonts and JS. It KEEPS standard tags + inline color / border / border-radius /
+    padding / margin / width / font-* / letter-spacing.
+    => Design rule: LIGHT theme only. Dark text on the (white) page, brand-red accents via
+       color + borders. Never rely on a background fill for legibility. All rich color /
+       gradients / dark drama live INSIDE the SVG images (immune to the sanitizer).
+    Keep the feature lists in sync with the module __manifest__ description.
+-->
+<div style="max-width:1120px;margin:0 auto;color:#27272a;font-family:Helvetica,Arial,sans-serif;">
+
+    <!-- ===== HERO (fully baked SVG — renders exactly as designed) ===== -->
+    <img src="hero_banner.svg" alt="SA Property Management — real estate and construction ERP for Odoo 18 and 19"
+         style="width:100%;height:auto;display:block;border-radius:18px;border:1px solid #ececf0;"/>
+
+    <!-- ===== CTA ROW ===== -->
+    <table style="width:100%;border-collapse:collapse;margin:22px 0 6px 0;">
+        <tr>
+            <td style="text-align:center;">
+                <span style="display:inline-block;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;padding:12px 26px;border-radius:10px;margin:0 6px 8px 0;">Get it on Odoo Apps &#8594;</span>
+                <span style="display:inline-block;border:1px solid #1f8a4c;color:#177f41;font-weight:bold;font-size:15px;padding:12px 22px;border-radius:10px;margin:0 6px 8px 0;">&#9679; Free &amp; open source</span>
+                <span style="display:inline-block;border:1px solid #d9d9e0;color:#52525b;font-size:15px;padding:12px 22px;border-radius:10px;margin:0 0 8px 0;">Odoo.sh &amp; on-premise ready</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ===== KPI STATS ===== -->
+    <table style="width:100%;border-collapse:separate;border-spacing:12px 0;margin-top:14px;">
+        <tr style="vertical-align:top;">
+            <td style="width:25%;border:1px solid #ececf0;border-top:3px solid #e11d2a;border-radius:14px;padding:18px;">
+                <div style="font-size:40px;font-weight:bold;color:#e11d2a;line-height:1;">2</div>
+                <div style="font-size:13px;color:#52525b;margin-top:6px;font-weight:bold;">Operational Suites</div>
+                <div style="font-size:12px;color:#8a8a93;margin-top:2px;">Sales &amp; delivery in one core</div>
+            </td>
+            <td style="width:25%;border:1px solid #ececf0;border-top:3px solid #e11d2a;border-radius:14px;padding:18px;">
+                <div style="font-size:40px;font-weight:bold;color:#e11d2a;line-height:1;">7<span style="color:#18181b;">+</span></div>
+                <div style="font-size:13px;color:#52525b;margin-top:6px;font-weight:bold;">Country Tax Presets</div>
+                <div style="font-size:12px;color:#8a8a93;margin-top:2px;">Configurable, no hard-coding</div>
+            </td>
+            <td style="width:25%;border:1px solid #ececf0;border-top:3px solid #e11d2a;border-radius:14px;padding:18px;">
+                <div style="font-size:40px;font-weight:bold;color:#e11d2a;line-height:1;">11</div>
+                <div style="font-size:13px;color:#52525b;margin-top:6px;font-weight:bold;">Native Odoo Apps</div>
+                <div style="font-size:12px;color:#8a8a93;margin-top:2px;">Built on standard modules</div>
+            </td>
+            <td style="width:25%;border:1px solid #ececf0;border-top:3px solid #1f8a4c;border-radius:14px;padding:18px;">
+                <div style="font-size:40px;font-weight:bold;color:#177f41;line-height:1;">49</div>
+                <div style="font-size:13px;color:#52525b;margin-top:6px;font-weight:bold;">Automated Tests</div>
+                <div style="font-size:12px;color:#8a8a93;margin-top:2px;">Green on Odoo 18 &amp; 19</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ===== TWO SUITES ===== -->
+    <div style="padding:46px 8px 8px 8px;">
+        <h2 style="text-align:center;font-size:32px;color:#18181b;margin:0 0 8px 0;letter-spacing:-0.5px;">Two Suites. One Operating Core.</h2>
+        <p style="text-align:center;font-size:15px;color:#6b7280;margin:0 0 30px 0;">
+            Version 2.0 unites sales velocity and delivery control in one branded workflow layer — no bolt-ons, no data silos.
+        </p>
+
+        <table style="width:100%;border-collapse:separate;border-spacing:16px 0;">
+            <tr style="vertical-align:top;">
+                <!-- Real estate -->
+                <td style="width:50%;border:1px solid #ececf0;border-top:3px solid #e11d2a;border-radius:14px;padding:26px;">
+                    <h3 style="color:#18181b;font-size:21px;margin:0 0 16px 0;">
+                        <span style="display:inline-block;width:42px;height:42px;line-height:38px;text-align:center;border-radius:12px;border:2px solid #e11d2a;color:#e11d2a;font-size:20px;margin-right:12px;vertical-align:middle;">&#8962;</span>Real Estate Engine
+                    </h3>
+                    <ul style="list-style:none;font-size:14.5px;line-height:1.85;color:#3f3f46;padding-left:0;margin:0;">
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Property catalogs with regional area units</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Society structure: blocks, streets, plots</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span><strong style="color:#18181b;">KIBOR-linked</strong> variable-rate plans</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Booking-to-invoice accounting continuity</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Investor deals and dealer <strong style="color:#18181b;">commission</strong></li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Transfer-deed generation with QR verification</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Buyback &amp; surrender wizards for cancellations</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Live receivables and status dashboard</li>
+                    </ul>
+                </td>
+
+                <!-- Construction -->
+                <td style="width:50%;border:1px solid #ececf0;border-top:3px solid #e11d2a;border-radius:14px;padding:26px;">
+                    <h3 style="color:#18181b;font-size:21px;margin:0 0 16px 0;">
+                        <span style="display:inline-block;width:42px;height:42px;line-height:38px;text-align:center;border-radius:12px;border:2px solid #e11d2a;color:#e11d2a;font-size:20px;margin-right:12px;vertical-align:middle;">&#9874;</span>Construction Engine
+                    </h3>
+                    <ul style="list-style:none;font-size:14.5px;line-height:1.85;color:#3f3f46;padding-left:0;margin:0;">
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Project phases with progress metrics</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Subcontracts built on detailed <strong style="color:#18181b;">BOQ</strong></li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span><strong style="color:#18181b;">IPC</strong> certification for executed work</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Requisitions auto-generating purchase RFQs</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Material issue flow via native stock moves</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Analytic + timesheet cost intelligence</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Certified-vs-contract overbilling control</li>
+                        <li><span style="color:#e11d2a;font-weight:bold;margin-right:9px;">&#9656;</span>Delivery readiness from one command center</li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ===== LIFECYCLE INFOGRAPHIC ===== -->
+    <div style="padding:40px 8px;">
+        <h2 style="text-align:center;font-size:28px;color:#18181b;margin:0 0 6px 0;letter-spacing:-0.5px;">How the work flows</h2>
+        <p style="text-align:center;font-size:14px;color:#6b7280;margin:0 0 30px 0;">Each suite runs an end-to-end pipeline inside Odoo — no manual hand-offs between stages.</p>
+
+        <div style="font-size:12px;letter-spacing:1.5px;color:#e11d2a;font-weight:bold;margin:0 0 12px 4px;">&#8962; REAL ESTATE LIFECYCLE</div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:30px;">
+            <tr style="vertical-align:middle;">
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">1</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Capture</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Lead &amp; CRM intake</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">2</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Reserve</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Booking created</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">3</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Plan</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Installment schedule</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">4</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Invoice</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Receivables &amp; payments</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">5</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Transfer</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Deed &amp; ownership</div>
+                </td>
+            </tr>
+        </table>
+
+        <div style="font-size:12px;letter-spacing:1.5px;color:#e11d2a;font-weight:bold;margin:0 0 12px 4px;">&#9874; CONSTRUCTION LIFECYCLE</div>
+        <table style="width:100%;border-collapse:collapse;">
+            <tr style="vertical-align:middle;">
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">1</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Plan</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Project &amp; phases</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">2</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Contract</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Subcontract BOQ</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">3</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Certify</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">IPC on executed work</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">4</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Procure</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Requisition &#8594; RFQ</div>
+                </td>
+                <td style="width:22px;text-align:center;color:#e11d2a;font-size:18px;font-weight:bold;">&#8594;</td>
+                <td style="border:1px solid #ececf0;border-radius:12px;padding:16px 8px;text-align:center;">
+                    <div style="width:32px;height:32px;line-height:28px;margin:0 auto 8px auto;border-radius:50%;border:2px solid #e11d2a;color:#e11d2a;font-weight:bold;font-size:15px;">5</div>
+                    <div style="font-size:13px;color:#18181b;font-weight:bold;">Issue</div>
+                    <div style="font-size:11px;color:#8a8a93;line-height:1.4;margin-top:2px;">Material to site</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ===== TAX + INTEGRATION ===== -->
+    <div style="padding:40px 8px;">
+        <table style="width:100%;border-collapse:separate;border-spacing:16px 0;">
+            <tr style="vertical-align:top;">
+                <td style="width:58%;border:1px solid #ececf0;border-left:3px solid #e11d2a;border-radius:14px;padding:26px;">
+                    <div style="display:inline-block;width:44px;height:44px;line-height:40px;text-align:center;border-radius:12px;border:2px solid #e11d2a;color:#e11d2a;font-size:20px;margin-bottom:12px;">&#9098;</div>
+                    <h2 style="font-size:26px;color:#18181b;margin:0 0 10px 0;letter-spacing:-0.5px;">Country-Aware Tax Engine</h2>
+                    <p style="font-size:15px;line-height:1.7;color:#3f3f46;margin:0 0 18px 0;">
+                        Pick your operating country and the matching transfer-cost structure applies
+                        automatically — fully configurable, with <strong style="color:#18181b;">no hard-coded country logic</strong>.
+                    </p>
+                    <img src="tax_bar.svg" alt="Illustrative transfer-cost composition: stamp duty, registration, capital gains, withholding and authority fees"
+                         style="width:100%;max-width:560px;height:auto;display:block;"/>
+                </td>
+                <td style="width:42%;border:1px solid #ececf0;border-left:3px solid #2156a8;border-radius:14px;padding:26px;">
+                    <div style="display:inline-block;width:44px;height:44px;line-height:40px;text-align:center;border-radius:12px;border:2px solid #2156a8;color:#2156a8;font-size:20px;margin-bottom:12px;">&#9638;</div>
+                    <h3 style="font-size:20px;color:#18181b;margin:0 0 6px 0;">Built On Native Odoo</h3>
+                    <p style="font-size:13px;color:#6b7280;margin:0 0 14px 0;line-height:1.6;">Standard modules do the heavy lifting — upgrade-safe and familiar to your team.</p>
+                    <div style="font-size:12.5px;">
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Accounting</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Sales</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Inventory</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Purchase</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Project</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Timesheets</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">CRM</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Portal</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Products</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Contacts</span>
+                        <span style="display:inline-block;border:1px solid #d9d9e0;border-radius:8px;padding:5px 10px;margin:0 6px 8px 0;color:#3f3f46;">Discuss</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ===== REPORTS ===== -->
+    <div style="padding:40px 8px;">
+        <h2 style="text-align:center;font-size:28px;color:#18181b;margin:0 0 24px 0;letter-spacing:-0.5px;">Documents &amp; Reporting Layer</h2>
+        <table style="width:100%;border-collapse:separate;border-spacing:12px 0;">
+            <tr style="vertical-align:top;">
+                <td style="width:33%;border:1px solid #ececf0;border-radius:14px;padding:26px 20px;text-align:center;">
+                    <div style="display:inline-block;width:46px;height:46px;line-height:42px;text-align:center;border-radius:12px;border:2px solid #e11d2a;color:#e11d2a;font-size:21px;margin-bottom:12px;">&#9670;</div>
+                    <div style="font-size:16px;font-weight:bold;color:#18181b;margin-bottom:6px;">Booking Confirmation</div>
+                    <div style="font-size:13px;color:#6b7280;line-height:1.6;">Branded confirmation with complete commercial summary.</div>
+                </td>
+                <td style="width:33%;border:1px solid #ececf0;border-radius:14px;padding:26px 20px;text-align:center;">
+                    <div style="display:inline-block;width:46px;height:46px;line-height:42px;text-align:center;border-radius:12px;border:2px solid #e11d2a;color:#e11d2a;font-size:21px;margin-bottom:12px;">&#9636;</div>
+                    <div style="font-size:16px;font-weight:bold;color:#18181b;margin-bottom:6px;">Installment Schedule</div>
+                    <div style="font-size:13px;color:#6b7280;line-height:1.6;">Clear due-date matrix with amount and payment status.</div>
+                </td>
+                <td style="width:33%;border:1px solid #ececf0;border-radius:14px;padding:26px 20px;text-align:center;">
+                    <div style="display:inline-block;width:46px;height:46px;line-height:42px;text-align:center;border-radius:12px;border:2px solid #e11d2a;color:#e11d2a;font-size:21px;margin-bottom:12px;">&#9998;</div>
+                    <div style="font-size:16px;font-weight:bold;color:#18181b;margin-bottom:6px;">Transfer Deed</div>
+                    <div style="font-size:13px;color:#6b7280;line-height:1.6;">Tax-itemized transfer document for compliant ownership change.</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div style="border:1px solid #ececf0;border-top:3px solid #e11d2a;border-radius:14px;padding:34px 24px;text-align:center;margin-top:18px;">
+        <div style="font-size:18px;color:#e11d2a;letter-spacing:6px;margin-bottom:12px;">&#11042; &#9672; &#11042;</div>
+        <p style="font-size:17px;color:#18181b;margin:0 0 8px 0;">
+            <strong>SA Property Management</strong> — professional real estate + construction operations on Odoo.
+        </p>
+        <p style="font-size:14px;color:#6b7280;margin:0;">
+            <a href="mailto:info@sasystems.solutions" style="color:#e11d2a;text-decoration:none;font-weight:bold;">info@sasystems.solutions</a>
+            &nbsp;&#183;&nbsp; Free &amp; open source &#183; Odoo 18 &amp; 19 &#183; Odoo.sh and on-premise ready.
+        </p>
+    </div>
+
+</div>
+</body>
+</html>

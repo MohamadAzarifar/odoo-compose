@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===== Shared QR + branding snippet ===== -->
+    <template id="sa_doc_qr_block">
+        <div class="row mt-4">
+            <div class="col-8">
+                <t t-set="tagline"
+                   t-value="o.env['ir.config_parameter'].sudo().get_param('sa_property_management.doc_tagline')"/>
+                <t t-set="footer_note"
+                   t-value="o.env['ir.config_parameter'].sudo().get_param('sa_property_management.doc_footer')"/>
+                <p t-if="tagline" class="text-muted mb-1"><em t-esc="tagline"/></p>
+                <p t-if="footer_note" class="small text-muted" t-esc="footer_note"/>
+            </div>
+            <div class="col-4 text-center">
+                <img t-if="o.sa_qr_image" t-att-src="image_data_uri(o.sa_qr_image)"
+                     style="width: 120px; height: 120px;" alt="QR"/>
+                <div class="small text-muted mt-1">Scan to verify</div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ===== Payment Receipt (Installment) ===== -->
+    <record id="action_report_sa_payment_receipt" model="ir.actions.report">
+        <field name="name">Payment Receipt</field>
+        <field name="model">sa.property.installment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sa_property_management.report_sa_payment_receipt</field>
+        <field name="report_file">sa_property_management.report_sa_payment_receipt</field>
+        <field name="binding_model_id" ref="model_sa_property_installment"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Receipt - %s' % (object.display_name)</field>
+    </record>
+
+    <template id="report_sa_payment_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">Payment Receipt</h2>
+                        <h4 class="text-center text-muted" t-field="o.display_name"/>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Customer</strong>
+                                <div t-field="o.customer_id"/>
+                                <div t-field="o.customer_id.sa_cnic"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Property</strong>
+                                <div t-field="o.property_id.display_name"/>
+                                <div t-field="o.booking_id.name"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm mt-4">
+                            <tr><th>Installment</th><td><span t-field="o.name"/></td></tr>
+                            <tr><th>Type</th><td><span t-field="o.line_type"/></td></tr>
+                            <tr><th>Due Date</th><td><span t-field="o.due_date"/></td></tr>
+                            <tr><th>Amount</th><td><span t-field="o.amount"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                            <tr><th>Amount Paid</th><td><span t-field="o.amount_paid"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                            <tr><th>Outstanding</th><td><span t-field="o.amount_residual"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                            <tr><th>Status</th><td><span t-field="o.state"/></td></tr>
+                        </table>
+                        <t t-call="sa_property_management.sa_doc_qr_block"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ===== Customer File ===== -->
+    <record id="action_report_sa_customer_file" model="ir.actions.report">
+        <field name="name">Customer File</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sa_property_management.report_sa_customer_file</field>
+        <field name="report_file">sa_property_management.report_sa_customer_file</field>
+        <field name="print_report_name">'Customer File - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_sa_customer_file">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">Customer File</h2>
+                        <h4 class="text-center text-muted" t-field="o.name"/>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Identity</strong>
+                                <table class="table table-sm">
+                                    <tr><th>National ID</th><td><span t-field="o.sa_cnic"/></td></tr>
+                                    <tr><th>Tax ID</th><td><span t-field="o.sa_ntn"/></td></tr>
+                                    <tr><th>Father / Husband</th><td><span t-field="o.sa_father_husband_name"/></td></tr>
+                                    <tr><th>Date of Birth</th><td><span t-field="o.sa_dob"/></td></tr>
+                                    <tr><th>Passport</th><td><span t-field="o.sa_passport_no"/></td></tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <strong>Contact</strong>
+                                <table class="table table-sm">
+                                    <tr><th>Mobile</th><td><span t-field="o.mobile"/></td></tr>
+                                    <tr><th>Telephone</th><td><span t-field="o.phone"/></td></tr>
+                                    <tr><th>Email</th><td><span t-field="o.email"/></td></tr>
+                                    <tr><th>Address</th><td>
+                                        <span t-field="o.street"/> <span t-field="o.city"/>
+                                    </td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <strong>Next of Kin</strong>
+                        <table class="table table-sm">
+                            <tr><th>Name</th><td><span t-field="o.sa_nok_name"/></td></tr>
+                            <tr><th>Relationship</th><td><span t-field="o.sa_nok_relation"/></td></tr>
+                            <tr><th>National ID</th><td><span t-field="o.sa_nok_cnic"/></td></tr>
+                            <tr><th>Mobile</th><td><span t-field="o.sa_nok_mobile"/></td></tr>
+                            <tr><th>Address</th><td><span t-field="o.sa_nok_address"/></td></tr>
+                        </table>
+                        <t t-call="sa_property_management.sa_doc_qr_block"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ===== Dealer Allocation ===== -->
+    <record id="action_report_sa_dealer_allocation" model="ir.actions.report">
+        <field name="name">Allocation Document</field>
+        <field name="model">sa.dealer.allocation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sa_property_management.report_sa_dealer_allocation</field>
+        <field name="report_file">sa_property_management.report_sa_dealer_allocation</field>
+        <field name="binding_model_id" ref="model_sa_dealer_allocation"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Allocation - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_sa_dealer_allocation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">Dealer Inventory Allocation</h2>
+                        <h4 class="text-center text-muted" t-field="o.name"/>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Dealer</strong>
+                                <div t-field="o.dealer_id.name"/>
+                                <div t-field="o.dealer_id.phone"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Allocation</strong>
+                                <div>Project: <span t-field="o.project_id.name"/></div>
+                                <div>Date: <span t-field="o.allocation_date"/></div>
+                                <div>Valid Until: <span t-field="o.expiry_date"/></div>
+                            </div>
+                        </div>
+                        <table class="table table-sm mt-4">
+                            <thead>
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Area</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.property_ids" t-as="p">
+                                    <td><span t-field="p.code"/></td>
+                                    <td><span t-field="p.name"/></td>
+                                    <td><span t-field="p.property_type"/></td>
+                                    <td class="text-end">
+                                        <span t-field="p.area"/> <span t-field="p.area_uom"/>
+                                    </td>
+                                    <td><span t-field="p.state"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <t t-call="sa_property_management.sa_doc_qr_block"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ===== Sale Agreement (Booking) ===== -->
+    <record id="action_report_sa_sale_agreement" model="ir.actions.report">
+        <field name="name">Sale Agreement</field>
+        <field name="model">sa.property.booking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sa_property_management.report_sa_sale_agreement</field>
+        <field name="report_file">sa_property_management.report_sa_sale_agreement</field>
+        <field name="binding_model_id" ref="model_sa_property_booking"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Sale Agreement - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_sa_sale_agreement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">Sale Agreement</h2>
+                        <h4 class="text-center text-muted" t-field="o.name"/>
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Buyer</strong>
+                                <div t-field="o.customer_id"/>
+                                <div t-field="o.customer_id.sa_cnic"/>
+                                <div t-field="o.customer_id.sa_father_husband_name"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Property</strong>
+                                <div t-field="o.property_id.display_name"/>
+                                <div t-field="o.project_id.name"/>
+                                <div>
+                                    <span t-field="o.property_id.area"/>
+                                    <span t-field="o.property_id.area_uom"/>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table table-sm mt-4">
+                            <tr><th>Sale Price</th><td><span t-field="o.total_price"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                            <tr><th>Payment Plan</th><td><span t-field="o.payment_plan_id.name"/></td></tr>
+                            <tr><th>Booking Date</th><td><span t-field="o.booking_date"/></td></tr>
+                            <tr><th>Dealer</th><td><span t-field="o.dealer_id.name"/></td></tr>
+                            <tr><th>Status</th><td><span t-field="o.state"/></td></tr>
+                        </table>
+                        <p class="mt-4">
+                            Signed: ____________________ (Buyer)
+                            &amp;nbsp;&amp;nbsp;&amp;nbsp;
+                            Signed: ____________________ (For Company)
+                        </p>
+                        <t t-call="sa_property_management.sa_doc_qr_block"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

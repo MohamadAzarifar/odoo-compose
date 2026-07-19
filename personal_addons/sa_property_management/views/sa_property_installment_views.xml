@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_property_installment_tree" model="ir.ui.view">
+        <field name="name">sa.property.installment.tree</field>
+        <field name="model">sa.property.installment</field>
+        <field name="arch" type="xml">
+            <list string="Installments" decoration-success="state == 'paid'"
+                  decoration-info="state == 'invoiced'"
+                  decoration-warning="state == 'partial'"
+                  decoration-danger="state == 'overdue'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="sequence" widget="handle"/>
+                <field name="booking_id"/>
+                <field name="property_id" optional="show"/>
+                <field name="customer_id" optional="show"/>
+                <field name="name"/>
+                <field name="line_type" optional="hide"/>
+                <field name="due_date"/>
+                <field name="amount" sum="Total"/>
+                <field name="amount_paid" sum="Paid"/>
+                <field name="amount_residual" sum="Residual"/>
+                <field name="days_overdue" optional="hide"/>
+                <field name="penalty_amount" sum="Penalty" optional="show"/>
+                <field name="state" widget="badge"/>
+                <field name="penalty_billed" column_invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <button name="action_generate_invoice" type="object" string="Invoice"
+                        icon="fa-file-text-o"
+                        invisible="state in ('paid', 'cancelled') or invoice_id"/>
+                <button name="action_register_payment" type="object" string="Pay"
+                        icon="fa-money"
+                        invisible="state in ('paid', 'cancelled')"/>
+                <button name="action_bill_penalty" type="object" string="Bill Penalty"
+                        icon="fa-exclamation-triangle"
+                        invisible="penalty_amount &lt;= 0 or penalty_billed"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_property_installment_form" model="ir.ui.view">
+        <field name="name">sa.property.installment.form</field>
+        <field name="model">sa.property.installment</field>
+        <field name="arch" type="xml">
+            <form string="Installment">
+                <header>
+                    <button name="action_generate_invoice" type="object"
+                            string="Generate Invoice" class="btn-primary"
+                            invisible="invoice_id or state in ('paid', 'cancelled')"/>
+                    <button name="action_register_payment" type="object"
+                            string="Register Payment" class="btn-primary"
+                            invisible="state in ('paid', 'cancelled')"/>
+                    <button name="action_open_invoice" type="object"
+                            string="Open Invoice" invisible="not invoice_id"/>
+                    <button name="action_bill_penalty" type="object"
+                            string="Bill Penalty"
+                            invisible="penalty_amount &lt;= 0 or penalty_billed"/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel" invisible="state == 'cancelled'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="booking_id"/>
+                            <field name="property_id"/>
+                            <field name="customer_id"/>
+                            <field name="name"/>
+                            <field name="line_type"/>
+                        </group>
+                        <group>
+                            <field name="due_date"/>
+                            <field name="amount"/>
+                            <field name="amount_paid" readonly="1"/>
+                            <field name="amount_residual" readonly="1"/>
+                            <field name="days_overdue" readonly="1"
+                                   invisible="days_overdue == 0"/>
+                            <field name="penalty_amount" readonly="1"
+                                   invisible="penalty_amount == 0"/>
+                            <field name="penalty_invoice_id" readonly="1"
+                                   invisible="not penalty_invoice_id"/>
+                            <field name="penalty_billed" invisible="1"/>
+                            <field name="invoice_id" readonly="1"/>
+                            <field name="invoice_state" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_property_installment_search" model="ir.ui.view">
+        <field name="name">sa.property.installment.search</field>
+        <field name="model">sa.property.installment</field>
+        <field name="arch" type="xml">
+            <search string="Receivables">
+                <field name="booking_id"/>
+                <field name="customer_id"/>
+                <field name="property_id"/>
+                <filter string="Pending" name="pending" domain="[('state', 'in', ('pending', 'invoiced'))]"/>
+                <filter string="Overdue" name="overdue" domain="[('state', '=', 'overdue')]"/>
+                <filter string="Partially Paid" name="partial" domain="[('state', '=', 'partial')]"/>
+                <filter string="Paid" name="paid" domain="[('state', '=', 'paid')]"/>
+                <separator/>
+                <filter string="Due This Month" name="due_month"
+                        domain="[('due_date', '&gt;=', (context_today()).strftime('%Y-%m-01'))]"/>
+                <filter string="Due Today" name="due_today"
+                        domain="[('due_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group>
+                    <filter string="Customer" name="grp_customer" context="{'group_by': 'customer_id'}"/>
+                    <filter string="Booking" name="grp_booking" context="{'group_by': 'booking_id'}"/>
+                    <filter string="Property" name="grp_property" context="{'group_by': 'property_id'}"/>
+                    <filter string="State" name="grp_state" context="{'group_by': 'state'}"/>
+                    <filter string="Due Month" name="grp_due" context="{'group_by': 'due_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_property_installment" model="ir.actions.act_window">
+        <field name="name">Receivables / Installments</field>
+        <field name="res_model">sa.property.installment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sa_property_installment_search"/>
+        <field name="context">{'search_default_pending': 1, 'search_default_overdue': 1, 'search_default_grp_property': 1}</field>
+    </record>
+
+</odoo>

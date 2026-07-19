@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_res_config_settings_inherit_sa_property" model="ir.ui.view">
+        <field name="name">res.config.settings.inherit.sa.property</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Property Management" string="Property Management"
+                     name="sa_property_management" groups="sa_property_management.group_sa_property_manager">
+                    <block title="Defaults" name="sa_defaults">
+                        <setting id="sa_operating_country_id" string="Operating Country"
+                                 help="Transfer taxes and charges for this country (and global ones) apply automatically.">
+                            <field name="sa_operating_country_id"/>
+                        </setting>
+                        <setting id="sa_default_area_uom" string="Default Area Unit"
+                                 help="Default unit displayed on new properties.">
+                            <field name="sa_default_area_uom"/>
+                        </setting>
+                        <setting id="sa_enforce_area_limit"
+                                 string="Enforce Project Land-Area Limit"
+                                 help="Default for new projects: block adding properties beyond the project's total land area.">
+                            <field name="sa_enforce_area_limit"/>
+                        </setting>
+                        <setting id="sa_default_dealer_commission"
+                                 string="Default Dealer Commission (%)">
+                            <field name="sa_default_dealer_commission"/>
+                        </setting>
+                        <setting id="sa_currency_id" string="Property Currency">
+                            <field name="sa_currency_id"/>
+                        </setting>
+                    </block>
+                    <block title="Accounting" name="sa_accounting">
+                        <setting id="sa_property_journal_id"
+                                 string="Property Sales Journal">
+                            <field name="sa_property_journal_id"/>
+                        </setting>
+                        <setting id="sa_transfer_journal_id"
+                                 string="Property Transfer Journal">
+                            <field name="sa_transfer_journal_id"/>
+                        </setting>
+                        <setting id="sa_default_property_income_account_id"
+                                 string="Default Income Account">
+                            <field name="sa_default_property_income_account_id"/>
+                        </setting>
+                        <setting id="sa_commission_expense_account_id"
+                                 string="Commission Expense Account"
+                                 help="Used on vendor bills for dealer and investor commissions.">
+                            <field name="sa_commission_expense_account_id"/>
+                        </setting>
+                        <setting id="sa_penalty_income_account_id"
+                                 string="Penalty Income Account"
+                                 help="Used on invoices raised for late-payment penalties.">
+                            <field name="sa_penalty_income_account_id"/>
+                        </setting>
+                        <setting id="sa_default_payment_term_id"
+                                 string="Default Payment Terms"
+                                 help="Native Odoo payment terms used on bookings, service bills and their invoices.">
+                            <field name="sa_default_payment_term_id"/>
+                        </setting>
+                    </block>
+                    <block title="Automation" name="sa_automation">
+                        <setting id="sa_send_payment_reminders"
+                                 string="Send Installment Reminders"
+                                 help="Email reminders for upcoming &amp; overdue installments.">
+                            <field name="sa_send_payment_reminders"/>
+                        </setting>
+                        <setting id="sa_require_biometric_verification"
+                                 string="Require Biometric Verification"
+                                 help="Block booking confirmation and transfer completion until the customer's identity is biometrically verified.">
+                            <field name="sa_require_biometric_verification"/>
+                        </setting>
+                    </block>
+                    <block title="Fingerprint Device (optional)" name="sa_biometric_device">
+                        <setting id="sa_secugen_webapi_url"
+                                 string="SecuGen WebAPI URL"
+                                 help="Local SecuGen SGIBioSrv capture endpoint on the operator's PC. Optional — if unset or offline, operators simply upload an image, so the device never blocks a booking or transfer.">
+                            <field name="sa_secugen_webapi_url"
+                                   placeholder="https://localhost:8443/SGIFPCapture"/>
+                            <div class="content-group mt-2">
+                                <div class="row">
+                                    <label for="sa_secugen_min_quality"
+                                           string="Min Quality" class="col-lg-5 o_light_label"/>
+                                    <field name="sa_secugen_min_quality"/>
+                                </div>
+                                <div class="row">
+                                    <label for="sa_secugen_timeout"
+                                           string="Capture Timeout (ms)" class="col-lg-5 o_light_label"/>
+                                    <field name="sa_secugen_timeout"/>
+                                </div>
+                                <div class="row">
+                                    <label for="sa_secugen_license"
+                                           string="License String" class="col-lg-5 o_light_label"/>
+                                    <field name="sa_secugen_license"
+                                           password="True"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Document Branding" name="sa_branding">
+                        <setting id="sa_doc_tagline" string="Document Tagline"
+                                 help="Printed under the company name on PDF documents.">
+                            <field name="sa_doc_tagline"/>
+                        </setting>
+                        <setting id="sa_doc_footer" string="Document Footer Note"
+                                 help="Branded footer line on receipts, bookings and allocations.">
+                            <field name="sa_doc_footer"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_sa_property_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'sa_property_management'}</field>
+    </record>
+
+</odoo>

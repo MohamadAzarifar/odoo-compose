@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_sa_booking" model="ir.actions.report">
+        <field name="name">Booking Confirmation</field>
+        <field name="model">sa.property.booking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sa_property_management.report_sa_booking_document</field>
+        <field name="report_file">sa_property_management.report_sa_booking_document</field>
+        <field name="binding_model_id" ref="model_sa_property_booking"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Booking - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_sa_booking_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Booking Confirmation</h2>
+                        <h4 t-field="o.name"/>
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>Customer</strong>
+                                <div t-field="o.customer_id"/>
+                                <div t-field="o.customer_id.sa_cnic"/>
+                                <div t-field="o.customer_id.phone"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Property</strong>
+                                <div t-field="o.property_id.display_name"/>
+                                <div>
+                                    <span t-field="o.property_id.area"/>
+                                    <span t-field="o.property_id.area_uom"/>
+                                </div>
+                                <div t-field="o.project_id.name"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm">
+                            <tr><th>Booking Date</th><td><span t-field="o.booking_date"/></td></tr>
+                            <tr><th>Sale Price</th><td><span t-field="o.total_price"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td></tr>
+                            <tr><th>Payment Plan</th><td><span t-field="o.payment_plan_id.name"/></td></tr>
+                            <tr><th>Dealer</th><td><span t-field="o.dealer_id.name"/></td></tr>
+                            <tr><th>Status</th><td><span t-field="o.state"/></td></tr>
+                        </table>
+                        <p t-if="o.note"><em t-field="o.note"/></p>
+                        <p class="mt32">
+                            Signed: ____________________ (Customer)
+                            &amp;nbsp;&amp;nbsp;&amp;nbsp;
+                            Signed: ____________________ (For Company)
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

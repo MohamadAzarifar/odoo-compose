@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_kibor_rate_list" model="ir.ui.view">
+        <field name="name">sa.kibor.rate.list</field>
+        <field name="model">sa.kibor.rate</field>
+        <field name="arch" type="xml">
+            <list editable="top" default_order="effective_date desc">
+                <field name="effective_date"/>
+                <field name="tenor"/>
+                <field name="rate"/>
+                <field name="note" optional="show"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sa_kibor_rate_form" model="ir.ui.view">
+        <field name="name">sa.kibor.rate.form</field>
+        <field name="model">sa.kibor.rate</field>
+        <field name="arch" type="xml">
+            <form string="KIBOR Rate">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="effective_date"/>
+                            <field name="tenor"/>
+                        </group>
+                        <group>
+                            <field name="rate"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Optional note"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sa_kibor_rate_search" model="ir.ui.view">
+        <field name="name">sa.kibor.rate.search</field>
+        <field name="model">sa.kibor.rate</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="effective_date"/>
+                <field name="tenor"/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter name="group_tenor" string="Tenor"
+                            context="{'group_by': 'tenor'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sa_kibor_rate" model="ir.actions.act_window">
+        <field name="name">KIBOR Rates</field>
+        <field name="res_model">sa.kibor.rate</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first KIBOR rate
+            </p>
+            <p>
+                Maintain effective-dated KIBOR rates. Payment plans using the
+                KIBOR + spread penalty method look up the applicable rate by
+                date automatically.
+            </p>
+        </field>
+    </record>
+
+</odoo>

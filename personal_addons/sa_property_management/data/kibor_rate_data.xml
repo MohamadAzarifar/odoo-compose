@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="kibor_6m_2024" model="sa.kibor.rate">
+            <field name="effective_date" eval="(DateTime.now() + relativedelta(years=-1, day=1, month=1)).strftime('%Y-%m-%d')"/>
+            <field name="tenor">6m</field>
+            <field name="rate">20.500</field>
+            <field name="note">Sample opening KIBOR rate</field>
+        </record>
+
+        <record id="kibor_6m_mid" model="sa.kibor.rate">
+            <field name="effective_date" eval="(DateTime.now() + relativedelta(months=-6, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="tenor">6m</field>
+            <field name="rate">17.250</field>
+            <field name="note">Sample mid-period KIBOR rate</field>
+        </record>
+
+        <record id="kibor_6m_current" model="sa.kibor.rate">
+            <field name="effective_date" eval="(DateTime.now() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="tenor">6m</field>
+            <field name="rate">12.000</field>
+            <field name="note">Sample current KIBOR rate</field>
+        </record>
+
+        <record id="kibor_3m_current" model="sa.kibor.rate">
+            <field name="effective_date" eval="(DateTime.now() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')"/>
+            <field name="tenor">3m</field>
+            <field name="rate">11.750</field>
+            <field name="note">Sample current 3M KIBOR rate</field>
+        </record>
+
+    </data>
+</odoo>

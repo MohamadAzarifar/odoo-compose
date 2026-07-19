@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root menu -->
+    <menuitem id="menu_sa_property_root"
+              name="Property Management"
+              web_icon="sa_property_management,static/description/icon.png"
+              sequence="40"
+              groups="sa_property_management.group_sa_property_user,sa_property_management.group_sa_construction_user"/>
+
+    <!-- Operations -->
+    <menuitem id="menu_sa_dashboard"
+              name="Dashboard"
+              parent="menu_sa_property_root"
+              action="action_sa_property_dashboard"
+              sequence="5"/>
+
+    <menuitem id="menu_sa_projects"
+              name="Projects"
+              parent="menu_sa_property_root"
+              action="action_sa_property_project"
+              sequence="10"/>
+
+    <menuitem id="menu_sa_properties"
+              name="Properties"
+              parent="menu_sa_property_root"
+              action="action_sa_property"
+              sequence="20"/>
+
+    <menuitem id="menu_sa_bookings"
+              name="Bookings"
+              parent="menu_sa_property_root"
+              action="action_sa_property_booking"
+              sequence="30"/>
+
+    <!-- CRM -->
+    <menuitem id="menu_sa_crm"
+              name="CRM"
+              parent="menu_sa_property_root"
+              sequence="35"/>
+
+    <menuitem id="menu_sa_leads"
+              name="Leads"
+              parent="menu_sa_crm"
+              action="action_sa_crm_lead"
+              sequence="10"/>
+
+    <menuitem id="menu_sa_opportunities"
+              name="Opportunities"
+              parent="menu_sa_crm"
+              action="action_sa_crm_opportunity"
+              sequence="20"/>
+
+    <menuitem id="menu_sa_receivables"
+              name="Receivables"
+              parent="menu_sa_property_root"
+              action="action_sa_property_installment"
+              sequence="40"/>
+
+    <menuitem id="menu_sa_transfers"
+              name="Transfers"
+              parent="menu_sa_property_root"
+              action="action_sa_property_transfer"
+              sequence="50"/>
+
+    <menuitem id="menu_sa_documents"
+              name="Documents"
+              parent="menu_sa_property_root"
+              action="action_sa_property_document"
+              sequence="55"/>
+
+    <menuitem id="menu_sa_biometric_verification"
+              name="Verifications"
+              parent="menu_sa_property_root"
+              action="action_sa_biometric_verification"
+              sequence="57"/>
+
+    <menuitem id="menu_sa_dealers"
+              name="Dealers"
+              parent="menu_sa_property_root"
+              action="action_sa_property_dealer"
+              sequence="60"/>
+
+    <menuitem id="menu_sa_dealer_allocation"
+              name="Allocations"
+              parent="menu_sa_property_root"
+              action="action_sa_dealer_allocation"
+              sequence="65"/>
+
+    <menuitem id="menu_sa_commissions"
+              name="Commissions"
+              parent="menu_sa_property_root"
+              action="action_sa_commission"
+              sequence="67"/>
+
+    <menuitem id="menu_sa_deals"
+              name="Investor Deals"
+              parent="menu_sa_property_root"
+              action="action_sa_property_deal"
+              sequence="68"/>
+
+    <menuitem id="menu_sa_service_billing"
+              name="Service Billing"
+              parent="menu_sa_property_root"
+              action="action_sa_service_assignment"
+              sequence="70"/>
+
+    <!-- Construction -->
+    <menuitem id="menu_sa_construction"
+              name="Construction"
+              parent="menu_sa_property_root"
+              sequence="75"
+              groups="sa_property_management.group_sa_construction_user"/>
+
+    <menuitem id="menu_sa_construction_projects"
+              name="Construction Projects"
+              parent="menu_sa_construction"
+              action="action_sa_construction_project"
+              sequence="10"/>
+
+    <menuitem id="menu_sa_construction_contracts"
+              name="Subcontracts"
+              parent="menu_sa_construction"
+              action="action_sa_construction_contract"
+              sequence="20"/>
+
+    <menuitem id="menu_sa_construction_ipc"
+              name="Payment Certificates"
+              parent="menu_sa_construction"
+              action="action_sa_construction_ipc"
+              sequence="30"/>
+
+    <menuitem id="menu_sa_construction_requisitions"
+              name="Material Requisitions"
+              parent="menu_sa_construction"
+              action="action_sa_construction_requisition"
+              sequence="40"/>
+
+    <menuitem id="menu_sa_construction_issues"
+              name="Material Issues"
+              parent="menu_sa_construction"
+              action="action_sa_construction_material_issue"
+              sequence="50"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_sa_configuration"
+              name="Configuration"
+              parent="menu_sa_property_root"
+              sequence="90"
+              groups="sa_property_management.group_sa_property_manager"/>
+
+    <menuitem id="menu_sa_settings"
+              name="Settings"
+              parent="menu_sa_configuration"
+              action="action_sa_property_settings"
+              sequence="5"/>
+
+    <menuitem id="menu_sa_payment_plans"
+              name="Payment Plans"
+              parent="menu_sa_configuration"
+              action="action_sa_payment_plan"
+              sequence="10"/>
+
+    <menuitem id="menu_sa_kibor_rates"
+              name="KIBOR Rates"
+              parent="menu_sa_configuration"
+              action="action_sa_kibor_rate"
+              sequence="15"/>
+
+    <menuitem id="menu_sa_transfer_taxes"
+              name="Transfer Taxes"
+              parent="menu_sa_configuration"
+              action="action_sa_transfer_tax"
+              sequence="20"/>
+
+    <menuitem id="menu_sa_misc_charges"
+              name="Misc Charges"
+              parent="menu_sa_configuration"
+              action="action_sa_misc_charge"
+              sequence="30"/>
+
+    <menuitem id="menu_sa_features"
+              name="Property Features"
+              parent="menu_sa_configuration"
+              action="action_sa_property_feature"
+              sequence="40"/>
+
+    <menuitem id="menu_sa_services_catalog"
+              name="Services &amp; Charges"
+              parent="menu_sa_configuration"
+              action="action_sa_property_service"
+              sequence="50"/>
+
+    <menuitem id="menu_sa_lead_sources"
+              name="Lead Sources"
+              parent="menu_sa_configuration"
+              action="action_sa_lead_source"
+              sequence="60"/>
+
+</odoo>

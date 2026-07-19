@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sa_lead_import_wizard_form" model="ir.ui.view">
+        <field name="name">sa.lead.import.wizard.form</field>
+        <field name="model">sa.lead.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Quick Import Leads">
+                <group>
+                    <field name="source_id" options="{'no_create': True}"/>
+                </group>
+                <group>
+                    <field name="data" nolabel="1"
+                           placeholder="One lead per line: Name, Email, Phone&#10;Ali Khan, ali@example.com, 0300-1234567&#10;Sara Malik, , 0321-7654321"/>
+                </group>
+                <footer>
+                    <button name="action_import" type="object" string="Import"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

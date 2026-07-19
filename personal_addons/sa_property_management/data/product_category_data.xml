@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Product category used for all property units so they are easy to
+             find in the standard Products / Sales / Purchase / Inventory apps. -->
+        <record id="product_category_property" model="product.category">
+            <field name="name">Real Estate Properties</field>
+        </record>
+
+    </data>
+</odoo>
