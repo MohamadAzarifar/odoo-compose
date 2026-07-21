@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_jalali" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.jalali</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='general_settings']//block[@name='languages_setting_container']" position="after">
+                <block title="Calendar" name="jalali_calendar_setting_container">
+                    <setting id="use_jalali_calendar_setting"
+                             string="Jalali (Shamsi) Calendar"
+                             help="Show Jalali dates in the backend for users whose personal preference is Default. Users with Persian language (fa_IR) also get Jalali when this is enabled or when their preference is Default. Database storage stays Gregorian.">
+                        <field name="use_jalali_calendar"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
