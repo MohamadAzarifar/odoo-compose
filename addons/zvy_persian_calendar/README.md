@@ -2,7 +2,7 @@
 
 Jalali (Shamsi) calendar presentation layer for Odoo 19. Dates stay stored as
 Gregorian ISO values in PostgreSQL; this module adds settings, session flags,
-and a tested JavaScript conversion core for upcoming UI patches.
+a tested JavaScript conversion core, display formatting, and a Jalali date picker.
 
 ## Install (this Docker repo)
 
@@ -16,9 +16,11 @@ docker-compose restart odoo
 Then in Odoo:
 
 1. **Apps → Update Apps List**
-2. Search **ZVY Persian Calendar** and install
+2. Search **ZVY Persian Calendar** and install (or **Upgrade** after code changes)
 3. **Settings → General Settings → Calendar** — enable **Jalali (Shamsi) Calendar**
 4. Optional: **My Profile → Preferences → Jalali Calendar** — override per user
+
+Use **Developer Mode (with assets)** when iterating on JS patches.
 
 ## Activation rules
 
@@ -31,15 +33,37 @@ Then in Odoo:
 When active, `session.jalali_calendar_enabled` is `true` in the browser session
 (devtools → Application → session, or `/web/session/get_session_info`).
 
-## Current scope (Phase 0 + 1)
+## Current scope
+
+### Phase 0 + 1 (done)
 
 - Installable module with company and user settings
 - Session flag exposed to JavaScript (`jalali_service.isActive()`)
 - Vendored [jalaali-js](https://github.com/jalaali/jalaali-js) conversion core
 - JS unit tests (HOOT) and Python settings tests
 
-UI patches (date fields, pickers, calendar view) are planned in later phases;
-with the feature enabled today there is **no visible date formatting change yet**.
+### Phase 2A — Display formatting (done)
+
+When Jalali is active, list and form fields **display** dates in Jalali via
+`dates_patch.js` and `formatters_patch.js`. Server serialization is unchanged.
+
+### Phase 2B — Date picker (done)
+
+When Jalali is active:
+
+- Popover calendar shows Jalali months, navigation, and year/decade pickers
+- Day cells store Gregorian ISO internally; selection saves Gregorian to the ORM
+- Manual input accepts Jalali strings (e.g. `1403/07/21`) on blur/Enter
+- Placeholder shows a Jalali example format
+- RTL styling on the picker (`jalali_calendar.scss`)
+
+### Manual test — picker + save
+
+1. Enable **Jalali (Shamsi) Calendar** in Settings → General.
+2. Open a contact → click **Birthday** → picker header shows a Jalali month (e.g. `Farvardin 1403`).
+3. Pick a date or type `1403/07/21` → save.
+4. DevTools → Network → `write` call: date value is Gregorian ISO (`2024-10-12`).
+5. Disable Jalali + hard-refresh → stock Gregorian picker returns.
 
 ## Run tests
 

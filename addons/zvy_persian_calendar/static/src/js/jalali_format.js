@@ -1,11 +1,15 @@
 /** @odoo-module **/
 
+import { localization } from "@web/core/l10n/localization";
+import { user } from "@web/core/user";
+import { session } from "@web/session";
 import { gregorianToJalali, jalaliToGregorian } from "./jalali_core";
 
 const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
 const LATIN_DIGITS = "0123456789";
 
-const PERSIAN_MONTHS = [
+/** Latin transliterations (used when UI language is not Persian). */
+export const JALALI_MONTHS_EN = [
     "Farvardin",
     "Ordibehesht",
     "Khordad",
@@ -20,7 +24,106 @@ const PERSIAN_MONTHS = [
     "Esfand",
 ];
 
-const PERSIAN_MONTHS_SHORT = PERSIAN_MONTHS.map((name) => name.slice(0, 3));
+/** Native Persian month names (used when UI language is Persian). */
+export const JALALI_MONTHS_FA = [
+    "فروردین",
+    "اردیبهشت",
+    "خرداد",
+    "تیر",
+    "مرداد",
+    "شهریور",
+    "مهر",
+    "آبان",
+    "آذر",
+    "دی",
+    "بهمن",
+    "اسفند",
+];
+
+/** @deprecated use getJalaliMonthNames() or JALALI_MONTHS_EN / JALALI_MONTHS_FA */
+export const PERSIAN_MONTHS = JALALI_MONTHS_EN;
+
+/**
+ * Current UI language code (e.g. "fa-IR", "fa_IR", "en-US").
+ * Odoo 19 removes session.user_context after boot; use user.lang instead.
+ * @returns {string}
+ */
+export function getUiLanguage() {
+    return (
+        user.lang ||
+        localization.code ||
+        session.user_context?.lang ||
+        document.documentElement.getAttribute("lang") ||
+        ""
+    );
+}
+
+/**
+ * @param {string} [lang]
+ * @returns {boolean}
+ */
+export function isPersianUiLanguage(lang) {
+    const code = (lang || getUiLanguage()).toLowerCase();
+    return code.startsWith("fa");
+}
+
+/**
+ * @param {string} [lang]
+ * @returns {string[]}
+ */
+export function getJalaliMonthNames(lang) {
+    return isPersianUiLanguage(lang) ? JALALI_MONTHS_FA : JALALI_MONTHS_EN;
+}
+
+/**
+ * @param {string} [lang]
+ * @returns {string[]}
+ */
+export function getJalaliMonthNamesShort(lang) {
+    return getJalaliMonthNames(lang).map((name) => name.slice(0, 3));
+}
+
+/**
+ * All month names accepted by the parser (Latin + فارسی).
+ * @returns {string[]}
+ */
+function getAllMonthNames() {
+    return [...JALALI_MONTHS_EN, ...JALALI_MONTHS_FA];
+}
+
+/**
+ * @returns {string[]}
+ */
+function getAllMonthNamesShort() {
+    return getAllMonthNames().map((name) => name.slice(0, 3));
+}
+
+/**
+ * @param {string} name
+ * @returns {number} 1-12, or 0 if unknown
+ */
+function monthIndexFromName(name) {
+    const enIndex = JALALI_MONTHS_EN.indexOf(name);
+    if (enIndex >= 0) {
+        return enIndex + 1;
+    }
+    const faIndex = JALALI_MONTHS_FA.indexOf(name);
+    if (faIndex >= 0) {
+        return faIndex + 1;
+    }
+    // Short forms
+    const shortEn = JALALI_MONTHS_EN.map((n) => n.slice(0, 3));
+    const shortFa = JALALI_MONTHS_FA.map((n) => n.slice(0, 3));
+    const shortEnIndex = shortEn.indexOf(name);
+    if (shortEnIndex >= 0) {
+        return shortEnIndex + 1;
+    }
+    const shortFaIndex = shortFa.indexOf(name);
+    if (shortFaIndex >= 0) {
+        return shortFaIndex + 1;
+    }
+    return 0;
+}
 
 /**
  * @param {string} value
@@ -48,8 +151,10 @@ export function toLatinDigits(value) {
  */
 export function formatJalali(date, pattern = "%Y/%m/%d") {
     const { jy, jm, jd } = gregorianToJalali(date);
-    const monthName = PERSIAN_MONTHS[jm - 1] || "";
-    const monthShort = PERSIAN_MONTHS_SHORT[jm - 1] || "";
+    const months = getJalaliMonthNames();
+    const monthsShort = getJalaliMonthNamesShort();
+    const monthName = months[jm - 1] || "";
+    const monthShort = monthsShort[jm - 1] || "";
     const pad2 = (num) => String(num).padStart(2, "0");
 
     return pattern
@@ -61,6 +166,15 @@ export function formatJalali(date, pattern = "%Y/%m/%d") {
         .replace(/%b/g, monthShort)
         .replace(/%-m/g, String(jm))
         .replace(/%-d/g, String(jd));
+}
+
+/**
+ * Escape a string for use inside a RegExp character class / alternation.
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -104,20 +218,19 @@ export function parseJalali(value, pattern = "%Y/%m/%d") {
                 regexPattern = regexPattern.replace("%-d", "(\\d{1,2})");
                 captureGroups.push("d");
                 break;
-            case "%B":
-                regexPattern = regexPattern.replace(
-                    "%B",
-                    `(${PERSIAN_MONTHS.join("|")})`
-                );
+            case "%B": {
+                const names = getAllMonthNames().map(escapeRegExp).join("|");
+                regexPattern = regexPattern.replace("%B", `(${names})`);
                 captureGroups.push("B");
                 break;
-            case "%b":
-                regexPattern = regexPattern.replace(
-                    "%b",
-                    `(${PERSIAN_MONTHS_SHORT.join("|")})`
-                );
+            }
+            case "%b": {
+                // Prefer longer names first so "Ord" doesn't steal from full names when mixed.
+                const names = getAllMonthNamesShort().map(escapeRegExp).join("|");
+                regexPattern = regexPattern.replace("%b", `(${names})`);
                 captureGroups.push("b");
                 break;
+            }
         }
     }
 
@@ -146,10 +259,8 @@ export function parseJalali(value, pattern = "%Y/%m/%d") {
                 jd = Number(part);
                 break;
             case "B":
-                jm = PERSIAN_MONTHS.indexOf(part) + 1;
-                break;
             case "b":
-                jm = PERSIAN_MONTHS_SHORT.indexOf(part) + 1;
+                jm = monthIndexFromName(part);
                 break;
         }
     }

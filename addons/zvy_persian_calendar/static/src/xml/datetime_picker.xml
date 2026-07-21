@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="web.DateTimePicker" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_datetime_picker')]" position="attributes">
+            <attribute name="t-att-class">{'o_jalali_calendar': isJalaliCalendar}</attribute>
+        </xpath>
+    </t>
+</templates>

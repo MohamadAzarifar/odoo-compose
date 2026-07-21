@@ -1,0 +1,30 @@
+.o_datetime_picker.o_jalali_calendar {
+    direction: rtl;
+
+    .o_datetime_picker_header {
+        direction: rtl;
+
+        .o_previous i,
+        .o_next i {
+            transform: scaleX(-1);
+        }
+    }
+
+    .o_date_picker,
+    .o_date_item_picker {
+        direction: rtl;
+    }
+
+    .o_week_number_cell {
+        direction: ltr;
+    }
+}
+
+.o_field_date,
+.o_field_datetime,
+.o_datetime_input {
+    &.o_jalali_calendar {
+        direction: rtl;
+        text-align: right;
+    }
+}

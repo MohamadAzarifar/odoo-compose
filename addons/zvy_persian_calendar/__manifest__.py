@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "ZVY Persian Calendar",
-    "version": "19.0.1.0.1",
+    "version": "19.0.1.0.6",
     "category": "Localization",
     "summary": "Jalali (Shamsi) calendar presentation layer for Odoo backend UI",
     "description": """
@@ -21,13 +21,49 @@ JavaScript conversion core for later UI patches.
     ],
     "assets": {
         "web.assets_backend": [
-            "zvy_persian_calendar/static/lib/jalaali/jalaali.js",
-            "zvy_persian_calendar/static/src/js/jalali_core.js",
-            "zvy_persian_calendar/static/src/js/jalali_format.js",
-            "zvy_persian_calendar/static/src/js/jalali_service.js",
+            (
+                "before",
+                "web/static/src/core/datetime/datetimepicker_service.js",
+                "zvy_persian_calendar/static/lib/jalaali/jalaali.js",
+            ),
+            (
+                "before",
+                "web/static/src/core/datetime/datetimepicker_service.js",
+                "zvy_persian_calendar/static/src/js/jalali_core.js",
+            ),
+            (
+                "before",
+                "web/static/src/core/datetime/datetimepicker_service.js",
+                "zvy_persian_calendar/static/src/js/jalali_format.js",
+            ),
+            (
+                "before",
+                "web/static/src/core/datetime/datetimepicker_service.js",
+                "zvy_persian_calendar/static/src/js/jalali_luxon_format.js",
+            ),
+            (
+                "before",
+                "web/static/src/core/datetime/datetimepicker_service.js",
+                "zvy_persian_calendar/static/src/js/jalali_service.js",
+            ),
+            (
+                "before",
+                "web/static/src/core/datetime/datetimepicker_service.js",
+                "zvy_persian_calendar/static/src/js/patches/dates_patch.js",
+            ),
+            "zvy_persian_calendar/static/src/js/jalali_picker_utils.js",
+            "zvy_persian_calendar/static/src/js/patches/formatters_patch.js",
+            "zvy_persian_calendar/static/src/js/patches/datetime_picker_patch.js",
+            "zvy_persian_calendar/static/src/js/patches/datetime_field_patch.js",
+            "zvy_persian_calendar/static/src/xml/datetime_picker.xml",
+            "zvy_persian_calendar/static/src/xml/datetime_input.xml",
+            "zvy_persian_calendar/static/src/scss/jalali_calendar.scss",
         ],
         "web.assets_unit_tests": [
             "zvy_persian_calendar/static/src/js/tests/jalali_core.test.js",
+            "zvy_persian_calendar/static/src/js/tests/jalali_luxon_format.test.js",
+            "zvy_persian_calendar/static/src/js/tests/jalali_picker_utils.test.js",
+            "zvy_persian_calendar/static/src/js/tests/jalali_parse.test.js",
         ],
     },
     "installable": True,

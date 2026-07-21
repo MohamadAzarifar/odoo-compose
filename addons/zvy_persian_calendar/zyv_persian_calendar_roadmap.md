@@ -261,8 +261,17 @@ Files in **Odoo core** (`addons/web/`) that this module will patch or extend:
 > **Implementation log (2026-07-21):** Phase 0 + Phase 1 landed in `addons/zvy_persian_calendar/`.
 > Module scaffold (manifest, settings, user prefs, `ir.http` session flag, README) and Jalali
 > conversion core (`jalaali-js` vendored, `jalali_core.js`, `jalali_format.js`, `jalali_service.js`,
-> HOOT + Python settings tests). UI patches (Phase 2+) not started — enabling the toggle does not
-> change visible date formatting yet. Docker install verification pending.
+> HOOT + Python settings tests).
+>
+> **Implementation log (2026-07-21, later):** Phase 2A — display formatting landed.
+> `dates_patch.js` and `formatters_patch.js` route `formatDate` / `formatDateTime` /
+> `toLocaleDateString` / `toLocaleDateTimeString` through Jalali when active. Server
+> serialization (`serializeDate`, `deserializeDate`) untouched.
+>
+> **Implementation log (2026-07-21, later):** Phase 2B — date picker widget landed.
+> Jalali month grid, month/year/decade navigation, manual Jalali typing (`1403/07/21`),
+> placeholders, and RTL picker styling. `dates_patch.js` also extended with `parseDate` /
+> `parseDateTime`; loaded before `datetimepicker_service.js` so input parsing works.
 
 ---
 
@@ -330,30 +339,59 @@ Files in **Odoo core** (`addons/web/`) that this module will patch or extend:
 
 #### 2A — Display formatting
 
-- [ ] Patch `formatters.js`:
-  - [ ] When `jalaliService.isActive()`, route `formatDate` / `formatDateTime` through `jalali_format.js`.
-  - [ ] Preserve time portion formatting (24h from `res.lang`).
-- [ ] Patch `dates.js` (careful — high impact):
-  - [ ] Override **display** format paths only; leave `serializeDate` / server paths untouched.
-  - [ ] Ensure `deserializeDate` still parses server ISO strings correctly.
+- [x] Patch `formatters.js`:
+  - [x] When `jalaliService.isActive()`, route `formatDate` / `formatDateTime` through `jalali_format.js`.
+  - [x] Preserve time portion formatting (24h from `res.lang`).
+- [x] Patch `dates.js` (careful — high impact):
+  - [x] Override **display** format paths only; leave `serializeDate` / server paths untouched.
+  - [x] Ensure `deserializeDate` still parses server ISO strings correctly.
+
+**Manual test scenario (2A — display only):**
+
+| Step | Action | Expected |
+|------|--------|----------|
+| 1 | `docker-compose restart odoo` → Apps → Upgrade **ZVY Persian Calendar** | Module loads without JS errors |
+| 2 | Settings → General → enable **Jalali (Shamsi) Calendar** | Setting persists |
+| 3 | Open **Contacts** list (`res.partner`) | `Birthday` column shows Jalali (e.g. `1403/07/21` for fa_IR format) |
+| 4 | Open a contact form with a birthdate | Form field **displays** Jalali; saved DB value stays Gregorian ISO |
+| 5 | Open **Invoicing → Customers → Invoices** list | `Invoice Date` column shows Jalali |
+| 6 | Open an invoice with `invoice_date` + `invoice_date_due` | Both dates display in Jalali; time (if any) uses 24h from language |
+| 7 | Settings → disable Jalali calendar → hard-refresh browser | Dates revert to stock Gregorian formatting |
+| 8 | DevTools → Network → any `read` RPC response | Date fields in JSON still `YYYY-MM-DD` (Gregorian) |
+
+*Note:* The date **picker** still shows the Gregorian calendar until Phase 2B. Only **display** formatting changes in 2A.
 
 #### 2B — Date picker widget
 
-- [ ] Patch `datetime_picker.js`:
-  - [ ] Render Jalali month/year in header.
-  - [ ] Build week grid from Jalali month boundaries (convert each cell to Gregorian for selection).
-  - [ ] Month navigation: prev/next Jalali month.
-  - [ ] Year/decade picker modes in Jalali.
-  - [ ] Highlight “today” in Jalali terms.
-  - [ ] Respect `minDate` / `maxDate` constraints (convert limits to Jalali display).
-- [ ] Patch `datetime_picker_hook.js` if hook API needs Jalali-aware defaults.
-- [ ] Patch `datetime_field.js`:
-  - [ ] Input placeholder shows Jalali example format.
-  - [ ] Manual typing: accept `1403/07/21` and convert on blur.
-  - [ ] On change: still emit Gregorian ISO to ORM.
-- [ ] Patch `list_datetime_field.js` for inline list editing.
-- [ ] Patch `datetime_input.js` for standalone usages (filters, wizards).
-- [ ] SCSS: RTL alignment, picker width, Persian digit toggle.
+- [x] Patch `datetime_picker.js`:
+  - [x] Render Jalali month/year in header.
+  - [x] Build week grid from Jalali month boundaries (convert each cell to Gregorian for selection).
+  - [x] Month navigation: prev/next Jalali month.
+  - [x] Year/decade picker modes in Jalali.
+  - [x] Highlight “today” in Jalali terms.
+  - [x] Respect `minDate` / `maxDate` constraints (convert limits to Jalali display).
+- [x] Patch `datetime_picker_hook.js` if hook API needs Jalali-aware defaults. *(N/A — hook delegates to picker service; no changes required)*
+- [x] Patch `datetime_field.js`:
+  - [x] Input placeholder shows Jalali example format.
+  - [x] Manual typing: accept `1403/07/21` and convert on blur.
+  - [x] On change: still emit Gregorian ISO to ORM.
+- [x] Patch `list_datetime_field.js` for inline list editing. *(inherits `dateField` / `dateTimeField` extractProps patches)*
+- [x] Patch `datetime_input.js` for standalone usages (filters, wizards).
+- [x] SCSS: RTL alignment, picker width, Persian digit toggle. *(RTL + chevron flip; Persian digits deferred to Phase 6)*
+
+**Manual test scenario (2B — picker + input):**
+
+| Step | Action | Expected |
+|------|--------|----------|
+| 1 | Upgrade module + hard-refresh (dev mode with assets) | No JS console errors |
+| 2 | Enable Jalali calendar in Settings | Active |
+| 3 | Open **Contacts** → edit a contact → click **Birthday** field | Popover opens with Jalali month header (e.g. `Farvardin 1403`) |
+| 4 | Navigate **prev/next** month arrows | Month changes by Jalali month (Esfand → Farvardin at year boundary) |
+| 5 | Click header → month grid → year grid | Jalali month names and years shown |
+| 6 | Select a day (e.g. `1403/07/21`) → Save | Field shows Jalali; Network `write` payload date is `2024-10-12` (Gregorian ISO) |
+| 7 | Clear field, type `1403/07/21` manually → Tab/Enter | Accepted and displayed in Jalali |
+| 8 | Open **Invoicing → Invoice** → edit `Invoice Date` in list view (inline) | Jalali picker works; save persists Gregorian in DB |
+| 9 | Disable Jalali → hard-refresh → repeat step 3 | Stock Gregorian picker returns |
 
 #### 2C — Manual QA targets (this repo’s installed apps)
 
@@ -505,13 +543,13 @@ Copy this section into an issue tracker; check items as you go.
 
 ### Field widgets (Phase 2)
 
-- [ ] `formatters.js` patched
-- [ ] `dates.js` display paths patched
-- [ ] `datetime_picker.js` patched
-- [ ] `datetime_field.js` patched
-- [ ] `list_datetime_field.js` patched
-- [ ] `datetime_input.js` patched
-- [ ] SCSS styling done
+- [x] `formatters.js` patched *(Phase 2A)*
+- [x] `dates.js` display paths patched *(Phase 2A)*
+- [x] `datetime_picker.js` patched *(Phase 2B)*
+- [x] `datetime_field.js` patched *(Phase 2B)*
+- [x] `list_datetime_field.js` patched *(Phase 2B — via field extractProps inheritance)*
+- [x] `datetime_input.js` patched *(Phase 2B)*
+- [x] SCSS styling done *(Phase 2B — RTL; Persian digits Phase 6)*
 - [ ] Manual QA on condominium + property modules
 
 ### Calendar app (Phase 3)
