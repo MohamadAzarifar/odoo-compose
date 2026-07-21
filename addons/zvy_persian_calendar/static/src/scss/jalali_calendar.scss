@@ -28,3 +28,12 @@
         text-align: right;
     }
 }
+
+// Calendar view (Phase 3): mute days outside the focused Jalali month
+.o_calendar_widget {
+    .fc-daygrid-day.o_jalali_outside_month {
+        .fc-daygrid-day-number {
+            opacity: 0.45;
+        }
+    }
+}

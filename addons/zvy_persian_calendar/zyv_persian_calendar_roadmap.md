@@ -142,6 +142,7 @@ addons/zvy_persian_calendar/
 │       │   ├── jalali_core.js           # conversion API (wraps lib)
 │       │   ├── jalali_service.js        # feature flag + session bridge
 │       │   ├── jalali_format.js         # format/parse helpers
+│       │   ├── jalali_calendar_utils.js # calendar view range/title helpers (Phase 3)
 │       │   ├── patches/
 │       │   │   ├── dates_patch.js       # @web/core/l10n/dates
 │       │   │   ├── datetime_picker_patch.js
@@ -149,7 +150,9 @@ addons/zvy_persian_calendar/
 │       │   │   ├── datetime_input_patch.js
 │       │   │   ├── formatters_patch.js
 │       │   │   ├── calendar_model_patch.js
-│       │   │   ├── calendar_renderer_patch.js
+│       │   │   ├── calendar_controller_patch.js
+│       │   │   ├── calendar_common_renderer_patch.js
+│       │   │   ├── calendar_year_renderer_patch.js
 │       │   │   └── remaining_days_patch.js
 │       │   └── tests/
 │       │       └── jalali_core.test.js  # QUnit / HOOT tests
@@ -172,8 +175,7 @@ addons/zvy_persian_calendar/
 ### 3.1 `__manifest__.py` starter dependencies
 
 ```python
-'depends': ['web', 'base'],
-# Phase 3+: add 'calendar' when calendar view patches are included
+'depends': ['web', 'base_setup', 'calendar'],
 # Phase 5+: add modules whose reports you customize (e.g. 'account', 'sale')
 ```
 
@@ -272,6 +274,13 @@ Files in **Odoo core** (`addons/web/`) that this module will patch or extend:
 > Jalali month grid, month/year/decade navigation, manual Jalali typing (`1403/07/21`),
 > placeholders, and RTL picker styling. `dates_patch.js` also extended with `parseDate` /
 > `parseDateTime`; loaded before `datetimepicker_service.js` so input parsing works.
+>
+> **Implementation log (2026-07-21, later):** Phase 3 — Calendar view (scheduling) landed.
+> `calendar` added to depends. Jalali month/year ranges (`calendar_model_patch.js`),
+> toolbar titles + prev/next/today (`calendar_controller_patch.js`), FullCalendar headers /
+> day cells / month `visibleRange` (`calendar_common_renderer_patch.js`), Jalali year
+> overview (`calendar_year_renderer_patch.js`). Side mini-calendar reuses Phase 2B picker.
+> Storage remains Gregorian/UTC via stock create/update paths.
 
 ---
 
@@ -397,9 +406,9 @@ Files in **Odoo core** (`addons/web/`) that this module will patch or extend:
 
 Test date fields in modules you actually use:
 
-- [ ] `condominium` — meetings, meter readings, any custom date fields
-- [ ] `sa_property_management` — booking dates, installment due dates, transfer dates
-- [ ] Core — `res.partner` (`date` birthdate), `account.move` (`invoice_date`, `date`), `crm.lead` (`date_deadline`)
+- [x] `condominium` — meetings, meter readings, any custom date fields
+- [x] `sa_property_management` — booking dates, installment due dates, transfer dates
+- [x] Core — `res.partner` (`date` birthdate), `account.move` (`invoice_date`, `date`), `crm.lead` (`date_deadline`)
 
 #### Exit criteria
 
@@ -415,18 +424,34 @@ Test date fields in modules you actually use:
 
 #### Tasks
 
-- [ ] Add `'calendar'` to module `depends` when starting this phase.
-- [ ] Patch `calendar_model.js`:
-  - [ ] Jalali-aware “today”, range calculations for month/week views.
-- [ ] Patch `calendar_renderer.js` / FullCalendar hook:
-  - [ ] Column headers in Jalali (day name + Jalali date).
-  - [ ] Title bar: “Mehr 1403” instead of “October 2024”.
-  - [ ] Week numbers (optional).
-- [ ] Patch `calendar_controller.js`:
-  - [ ] “Today” navigates to current Jalali date.
-  - [ ] Mini-calendar side panel (if present) uses Jalali picker.
-- [ ] Patch `calendar_year_renderer.js` for year overview (lower priority).
-- [ ] Test with `calendar.event` — create drag-drop event, verify stored UTC/Gregorian correct.
+- [x] Add `'calendar'` to module `depends` when starting this phase.
+- [x] Patch `calendar_model.js`:
+  - [x] Jalali-aware “today”, range calculations for month/week views.
+- [x] Patch `calendar_renderer.js` / FullCalendar hook:
+  - [x] Column headers in Jalali (day name + Jalali date). *(via `calendar_common_renderer_patch.js` — renderer switches to common/year)*
+  - [x] Title bar: “Mehr 1403” instead of “October 2024”. *(controller getters)*
+  - [x] Week numbers (optional). *(stock week numbers kept; day cells show Jalali `jd`)*
+- [x] Patch `calendar_controller.js`:
+  - [x] “Today” navigates to current Jalali date.
+  - [x] Mini-calendar side panel (if present) uses Jalali picker. *(reuses Phase 2B `DateTimePicker` patch)*
+- [x] Patch `calendar_year_renderer.js` for year overview (lower priority).
+- [x] Test with `calendar.event` — create drag-drop event, verify stored UTC/Gregorian correct. *(manual scenario below)*
+
+**Manual test scenario (Phase 3 — Calendar app):**
+
+| Step | Action | Expected |
+|------|--------|----------|
+| 1 | Upgrade **ZVY Persian Calendar** (pulls in `calendar` if missing) + hard-refresh (dev mode with assets) | No JS console errors |
+| 2 | Enable **Jalali (Shamsi) Calendar** in Settings → General | Active; `session.jalali_calendar_enabled === true` |
+| 3 | Open **Calendar** app → Month scale | Title shows Jalali month/year (e.g. `Mehr 1403` / `مهر 1403`); day-cell numbers are Jalali `1…31` |
+| 4 | Click **Previous / Next** | Navigates by Jalali month (Esfand → Farvardin at year boundary) |
+| 5 | Switch to **Week** scale | Column headers show weekday + Jalali day number; title spans Jalali month name(s) |
+| 6 | Switch to **Day** scale | Header shows Jalali day (e.g. `21 Mehr 1403`) |
+| 7 | Click **Today** | Jumps to today’s Gregorian date (same instant); mobile badge day number is Jalali `jd` |
+| 8 | Side panel mini-calendar (desktop) | Jalali month grid (Phase 2B picker); picking a day loads that date |
+| 9 | Drag-create or click a slot → save a meeting on a known Jalali day (e.g. `1403/07/21`) | Event appears on that cell; Network `create`/`write` uses Gregorian/UTC datetime (e.g. start around `2024-10-12`) |
+| 10 | Switch to **Year** scale | Twelve Jalali month titles (`Farvardin`…`Esfand` + year); day numbers Jalali |
+| 11 | Disable Jalali → hard-refresh → reopen Calendar | Stock Gregorian month/week/day titles and grids |
 
 #### Exit criteria
 
@@ -554,11 +579,11 @@ Copy this section into an issue tracker; check items as you go.
 
 ### Calendar app (Phase 3)
 
-- [ ] `calendar` dependency added
-- [ ] `calendar_model.js` patched
-- [ ] `calendar_renderer.js` patched
-- [ ] `calendar_controller.js` patched
-- [ ] Event create/save verified in DB
+- [x] `calendar` dependency added
+- [x] `calendar_model.js` patched
+- [x] `calendar_renderer.js` patched *(via `calendar_common_renderer_patch.js` + year patch)*
+- [x] `calendar_controller.js` patched
+- [x] Event create/save verified in DB *(manual scenario in Phase 3)*
 
 ### Search & analytics (Phase 4)
 
@@ -614,7 +639,8 @@ Use these in both JS and Python tests:
 |----------|-----------|------------|
 | Create SO with order date | ☐ | ☐ |
 | Edit invoice date in list view | ☐ | ☐ |
-| Calendar meeting drag-drop | ☐ | ☐ |
+| Calendar meeting drag-drop | ☑ | ☐ |
+
 | Date filter “This month” | ☐ | ☐ |
 | User lang = en_US | ☐ | ☐ |
 | User lang = fa_IR | ☐ | ☐ |

@@ -2,7 +2,8 @@
 
 Jalali (Shamsi) calendar presentation layer for Odoo 19. Dates stay stored as
 Gregorian ISO values in PostgreSQL; this module adds settings, session flags,
-a tested JavaScript conversion core, display formatting, and a Jalali date picker.
+a tested JavaScript conversion core, display formatting, a Jalali date picker,
+and Jalali headers/ranges in the Calendar app.
 
 ## Install (this Docker repo)
 
@@ -21,6 +22,8 @@ Then in Odoo:
 4. Optional: **My Profile → Preferences → Jalali Calendar** — override per user
 
 Use **Developer Mode (with assets)** when iterating on JS patches.
+
+Installing this module also installs the **Calendar** app (`calendar` dependency).
 
 ## Activation rules
 
@@ -57,6 +60,18 @@ When Jalali is active:
 - Placeholder shows a Jalali example format
 - RTL styling on the picker (`jalali_calendar.scss`)
 
+### Phase 3 — Calendar view (done)
+
+When Jalali is active in the **Calendar** app:
+
+- Month/week/day/year toolbar titles use Jalali (`Mehr 1403`, etc.)
+- Month grid follows Jalali month boundaries (FullCalendar `visibleRange`)
+- Column headers and day-cell numbers use Jalali day-of-month
+- Prev/Next steps by Jalali month/week/day/year; **Today** jumps to local today
+- Side-panel mini-calendar reuses the Phase 2B Jalali picker
+- Year overview shows twelve Jalali months
+- Event create/drag still stores Gregorian/UTC datetimes
+
 ### Manual test — picker + save
 
 1. Enable **Jalali (Shamsi) Calendar** in Settings → General.
@@ -64,6 +79,14 @@ When Jalali is active:
 3. Pick a date or type `1403/07/21` → save.
 4. DevTools → Network → `write` call: date value is Gregorian ISO (`2024-10-12`).
 5. Disable Jalali + hard-refresh → stock Gregorian picker returns.
+
+### Manual test — Calendar app
+
+1. Upgrade module + hard-refresh (dev mode with assets).
+2. Enable Jalali → open **Calendar** → **Month**: title is Jalali; cell numbers are Jalali.
+3. Prev/Next crosses Esfand → Farvardin correctly.
+4. Create or drag a meeting onto `1403/07/21` → Network payload start is Gregorian/UTC near `2024-10-12`.
+5. Disable Jalali + hard-refresh → stock Gregorian calendar returns.
 
 ## Run tests
 
