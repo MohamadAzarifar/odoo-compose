@@ -3,7 +3,7 @@
 Jalali (Shamsi) calendar presentation layer for Odoo 19. Dates stay stored as
 Gregorian ISO values in PostgreSQL; this module adds settings, session flags,
 a tested JavaScript conversion core, display formatting, a Jalali date picker,
-and Jalali headers/ranges in the Calendar app.
+Jalali headers/ranges in the Calendar app, and Jalali-aware search date filters.
 
 ## Install (this Docker repo)
 
@@ -72,6 +72,20 @@ When Jalali is active in the **Calendar** app:
 - Year overview shows twelve Jalali months
 - Event create/drag still stores Gregorian/UTC datetimes
 
+### Phase 4 — Search filters (done)
+
+When Jalali is active:
+
+- Filters → Date period menu shows Jalali month names and years (e.g. `Mehr`, `1403`)
+- “This month” / current month option uses Jalali month → Gregorian domain bounds
+- “This year” / current year option is 1 Farvardin–29/30 Esfand → Gregorian range
+- Quarters are Jalali seasons (Q1 Farvardin–Khordad … Q4 Dey–Esfand)
+- Domain-selector custom range reuses the Phase 2B Jalali picker
+- Domain-selector month/year presets (`Month to date`, `Year to date`, …) use Jalali bounds
+
+**Note:** Filters “This year” means the **Jalali calendar year**, which often matches
+Iranian fiscal year (1 Farvardin) but may differ from a company’s configured fiscal year.
+
 ### Manual test — picker + save
 
 1. Enable **Jalali (Shamsi) Calendar** in Settings → General.
@@ -87,6 +101,16 @@ When Jalali is active in the **Calendar** app:
 3. Prev/Next crosses Esfand → Farvardin correctly.
 4. Create or drag a meeting onto `1403/07/21` → Network payload start is Gregorian/UTC near `2024-10-12`.
 5. Disable Jalali + hard-refresh → stock Gregorian calendar returns.
+
+### Manual test — Search date filters
+
+1. Upgrade module + hard-refresh (dev mode with assets).
+2. Enable Jalali → open **Invoicing → Customers Invoices** (or any list with a Date filter).
+3. Filters → **Invoice Date** (or **Date**): month labels are Jalali; years are Jalali (e.g. `1403`).
+4. Select the **current month** (+ year if needed): facet shows Jalali month; Network `search_read` domain uses Gregorian ISO bounds for that Jalali month.
+5. Clear → select the **current year** only: domain spans Farvardin 1–Esfand 29/30 of that Jalali year.
+6. Add custom filter → date **is in** → **Custom range**: pickers show Jalali months; chosen bounds serialize as Gregorian.
+7. Disable Jalali + hard-refresh → stock Gregorian period menu returns.
 
 ## Run tests
 

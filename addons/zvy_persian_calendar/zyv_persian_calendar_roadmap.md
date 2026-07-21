@@ -281,6 +281,12 @@ Files in **Odoo core** (`addons/web/`) that this module will patch or extend:
 > day cells / month `visibleRange` (`calendar_common_renderer_patch.js`), Jalali year
 > overview (`calendar_year_renderer_patch.js`). Side mini-calendar reuses Phase 2B picker.
 > Storage remains Gregorian/UTC via stock create/update paths.
+>
+> **Implementation log (2026-07-21, later):** Phase 4 — Search filters & analytic views landed.
+> Jalali period options + domains (`jalali_search_utils.js`, `search_dates_patch.js`,
+> `search_model_patch.js`). Domain-selector month/year “in range” presets rewritten to
+> Jalali Gregorian bounds (`virtual_operators_patch.js`); custom range reuses Phase 2B
+> picker. Optional `web_cohort` / `web_grid` left for P3. Fiscal-year note documented.
 
 ---
 
@@ -466,14 +472,33 @@ Test date fields in modules you actually use:
 
 #### Tasks
 
-- [ ] Identify date filter components in `web/static/src/search/` (grep for `DateFilter`, `Comparison`, date domains).
-- [ ] Patch relative ranges:
-  - [ ] “This month” = current **Jalali** month converted to Gregorian domain.
-  - [ ] “This year” = current Jalali year (1 Farvardin – 29/30 Esfand) → Gregorian range.
-  - [ ] Document that fiscal year alignment may differ from Jalali year.
-- [ ] Patch custom date range picker in search panel to use Jalali picker (Phase 2 widget).
+- [x] Identify date filter components in `web/static/src/search/` (grep for `DateFilter`, `Comparison`, date domains).
+  - Primary: `web/static/src/search/utils/dates.js` (`constructDateDomain`, `getPeriodOptions`) + `search_model.js`.
+  - Domain selector: `web/static/src/core/tree_editor/virtual_operators.js` (“in range” smart dates + custom range).
+- [x] Patch relative ranges:
+  - [x] “This month” = current **Jalali** month converted to Gregorian domain.
+  - [x] “This year” = current Jalali year (1 Farvardin – 29/30 Esfand) → Gregorian range.
+  - [x] Document that fiscal year alignment may differ from Jalali year.
+- [x] Patch custom date range picker in search panel to use Jalali picker (Phase 2 widget).
+  - Domain-selector **Custom range** uses `DateTimeInput` → Phase 2B Jalali picker.
+  - Domain-selector **Month to date** / **Year to date** / **Last month** / **Last 12 months** use Jalali bounds via `virtual_operators_patch.js`.
 - [ ] (Optional P3) `web_cohort` — column period labels.
 - [ ] (Optional P3) `web_grid` — row/column date headers.
+
+**Manual test scenario (Phase 4 — Search filters):**
+
+| Step | Action | Expected |
+|------|--------|----------|
+| 1 | Upgrade **ZVY Persian Calendar** + hard-refresh (dev mode with assets) | No JS console errors |
+| 2 | Enable **Jalali (Shamsi) Calendar** in Settings → General | `session.jalali_calendar_enabled === true` |
+| 3 | Open **Invoicing → Customers Invoices** (list) | Search bar Filters menu available |
+| 4 | Filters → **Invoice Date** (or **Date**) | Period options show Jalali month names (`Mehr` / `مهر`, …) and Jalali years (`1403`, …) |
+| 5 | Select **current month** (and year if not auto-added) | Facet e.g. `Invoice Date: Mehr 1403`; Network `search_read`/`web_search_read` domain uses Gregorian bounds for that Jalali month (e.g. Mehr 1403 → `2024-09-22` … `2024-10-21`) |
+| 6 | Clear filter → select **current year** only | Facet shows Jalali year (`1403`); domain is Farvardin 1–Esfand 29/30 as Gregorian ISO (e.g. `2024-03-20` … `2025-03-20` for 1403) |
+| 7 | Boundary check: with reference near Esfand/Farvardin, toggle month across year | No off-by-one; Esfand 29/30 and Farvardin 1 map to correct Gregorian days |
+| 8 | Filters → **Add Custom Filter** → date field **is in** → **Custom range** | From/to pickers show Jalali month grid; values serialize as Gregorian ISO in the domain |
+| 9 | Same menu → **Month to date** / **Year to date** | Domain bounds start at Jalali month/year start (Gregorian ISO), not Gregorian 1st Jan/1st of month |
+| 10 | Disable Jalali → hard-refresh → repeat step 4 | Stock Gregorian month names and year numbers return |
 
 #### Exit criteria
 
@@ -587,9 +612,9 @@ Copy this section into an issue tracker; check items as you go.
 
 ### Search & analytics (Phase 4)
 
-- [ ] Jalali “This month” filter
-- [ ] Jalali “This year” filter
-- [ ] Custom date range picker
+- [x] Jalali “This month” filter
+- [x] Jalali “This year” filter
+- [x] Custom date range picker
 - [ ] (Optional) Cohort/grid headers
 
 ### Reports (Phase 5)
@@ -640,8 +665,7 @@ Use these in both JS and Python tests:
 | Create SO with order date | ☐ | ☐ |
 | Edit invoice date in list view | ☐ | ☐ |
 | Calendar meeting drag-drop | ☑ | ☐ |
-
-| Date filter “This month” | ☐ | ☐ |
+| Date filter “This month” | ☑ *(manual scenario Phase 4)* | ☐ |
 | User lang = en_US | ☐ | ☐ |
 | User lang = fa_IR | ☐ | ☐ |
 | PDF invoice print | ☐ | ☐ |
@@ -723,7 +747,7 @@ docker-compose restart odoo
 
 ### v1.2.0 — Filters
 
-- [ ] Jalali-relative search filters (this month/year)
+- [x] Jalali-relative search filters (this month/year)
 
 ### v1.3.0 — Reports
 

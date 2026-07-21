@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "ZVY Persian Calendar",
-    "version": "19.0.1.0.7",
+    "version": "19.0.1.0.8",
     "category": "Localization",
     "summary": "Jalali (Shamsi) calendar presentation layer for Odoo backend UI",
     "description": """
@@ -10,7 +10,8 @@ Persian (Jalali) Calendar
 
 Shows Jalali dates in the Odoo backend while keeping Gregorian ISO storage
 in the database. Includes company and user-level toggles, a tested
-JavaScript conversion core, date field widgets, and Calendar app view patches.
+JavaScript conversion core, date field widgets, Calendar app view patches,
+and Jalali-aware search date filters.
     """,
     "author": "ZVY",
     "license": "LGPL-3",
@@ -53,6 +54,7 @@ JavaScript conversion core, date field widgets, and Calendar app view patches.
             ),
             "zvy_persian_calendar/static/src/js/jalali_picker_utils.js",
             "zvy_persian_calendar/static/src/js/jalali_calendar_utils.js",
+            "zvy_persian_calendar/static/src/js/jalali_search_utils.js",
             "zvy_persian_calendar/static/src/js/patches/formatters_patch.js",
             "zvy_persian_calendar/static/src/js/patches/datetime_picker_patch.js",
             "zvy_persian_calendar/static/src/js/patches/datetime_field_patch.js",
@@ -60,6 +62,9 @@ JavaScript conversion core, date field widgets, and Calendar app view patches.
             "zvy_persian_calendar/static/src/js/patches/calendar_controller_patch.js",
             "zvy_persian_calendar/static/src/js/patches/calendar_common_renderer_patch.js",
             "zvy_persian_calendar/static/src/js/patches/calendar_year_renderer_patch.js",
+            "zvy_persian_calendar/static/src/js/patches/search_dates_patch.js",
+            "zvy_persian_calendar/static/src/js/patches/search_model_patch.js",
+            "zvy_persian_calendar/static/src/js/patches/virtual_operators_patch.js",
             "zvy_persian_calendar/static/src/xml/datetime_picker.xml",
             "zvy_persian_calendar/static/src/xml/datetime_input.xml",
             "zvy_persian_calendar/static/src/xml/calendar_jalali.xml",
@@ -71,6 +76,7 @@ JavaScript conversion core, date field widgets, and Calendar app view patches.
             "zvy_persian_calendar/static/src/js/tests/jalali_picker_utils.test.js",
             "zvy_persian_calendar/static/src/js/tests/jalali_parse.test.js",
             "zvy_persian_calendar/static/src/js/tests/jalali_calendar_utils.test.js",
+            "zvy_persian_calendar/static/src/js/tests/jalali_search_utils.test.js",
         ],
     },
     "installable": True,

@@ -37,3 +37,16 @@
         }
     }
 }
+
+// Year mini-calendars: ensure day grids always use full width (7 columns).
+.o_calendar_renderer .fc-dayGridYear-view > .fc-month-container > .fc-month {
+    .fc-daygrid-body,
+    .fc-col-header {
+        width: 100% !important;
+    }
+
+    .fc-daygrid-body > table,
+    .fc-col-header > table {
+        width: 100%;
+    }
+}

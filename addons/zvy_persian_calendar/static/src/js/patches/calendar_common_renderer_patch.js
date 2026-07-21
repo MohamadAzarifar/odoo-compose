@@ -16,8 +16,8 @@ const { DateTime } = luxon;
 const SCALE_TO_FC_VIEW_JALALI = {
     day: "timeGridDay",
     week: "timeGridWeek",
-    // dayGridMonth assumes Gregorian month; use dayGrid + visibleRange for Jalali months.
-    month: "dayGrid",
+    // Keep dayGridMonth (week rows + Odoo SCSS). Jalali bounds come from visibleRange.
+    month: "dayGridMonth",
 };
 
 patch(CalendarCommonRenderer.prototype, {
@@ -34,12 +34,20 @@ patch(CalendarCommonRenderer.prototype, {
             dayCellContent: (arg) => this.getJalaliDayCellContent(arg),
         };
         if (scale === "month") {
+            patched.views = {
+                dayGridMonth: {
+                    type: "dayGrid",
+                    duration: { weeks: 6 },
+                    fixedWeekCount: false,
+                },
+            };
             patched.visibleRange = toFullCalendarVisibleRange(
                 this.props.model.rangeStart,
                 this.props.model.rangeEnd
             );
             // Keep overflow weeks visible; cells outside the Jalali month are muted via classNames.
             patched.showNonCurrentDates = true;
+            patched.fixedWeekCount = false;
         }
         return patched;
     },
